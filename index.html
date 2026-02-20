@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - Testing Mode</title>
+    <title>GalleryApp - Local Version</title>
     
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * {
@@ -55,9 +52,6 @@
             border-radius: 8px;
             font-size: 14px;
         }
-        .info-box strong {
-            color: #2196f3;
-        }
         .input-group {
             margin-bottom: 20px;
         }
@@ -85,11 +79,15 @@
             cursor: pointer;
             margin-bottom: 10px;
         }
-        .btn-secondary {
-            background: #95a5a6;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
         }
-        .btn-test {
+        .btn-success {
             background: #27ae60;
+        }
+        .btn-warning {
+            background: #f39c12;
         }
         .auth-link {
             text-align: center;
@@ -115,6 +113,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         .nav-brand {
             font-size: 24px;
@@ -124,11 +123,16 @@
         .nav-menu {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .nav-item {
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 10px;
+            font-weight: 500;
+        }
+        .nav-item:hover {
+            background: #f0f0f0;
         }
         .nav-item.active {
             background: #667eea;
@@ -155,6 +159,9 @@
         }
         .content {
             padding: 30px;
+        }
+        .page-header {
+            margin-bottom: 30px;
         }
         .page-header h2 {
             color: #333;
@@ -191,21 +198,27 @@
             font-weight: 600;
             color: #667eea;
         }
+        .photo-caption {
+            color: #666;
+            margin: 10px 0;
+        }
         .photo-actions {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
-        .like-btn, .delete-btn {
+        .like-btn, .delete-btn, .edit-btn {
             padding: 8px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 14px;
             flex: 1;
         }
         .like-btn { background: #f0f0f0; }
         .like-btn.liked { background: #ff6b6b; color: white; }
         .delete-btn { background: #e74c3c; color: white; }
+        .edit-btn { background: #f39c12; color: white; }
         .upload-section {
             background: white;
             padding: 30px;
@@ -221,7 +234,12 @@
             cursor: pointer;
             margin-bottom: 20px;
         }
-        .file-upload input { display: none; }
+        .file-upload:hover {
+            background: #f8f9ff;
+        }
+        .file-upload input {
+            display: none;
+        }
         .image-preview {
             max-width: 100%;
             max-height: 300px;
@@ -235,6 +253,7 @@
             border: 2px solid #e1e1e1;
             border-radius: 10px;
             min-height: 100px;
+            resize: vertical;
             margin-bottom: 20px;
         }
         .empty-state {
@@ -252,6 +271,38 @@
             display: inline-block;
             margin-left: 10px;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px;
+            }
+            .nav-menu {
+                width: 100%;
+                justify-content: center;
+                margin: 10px 0;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -259,26 +310,26 @@
         <!-- Login Card -->
         <div id="authContainer" class="auth-container">
             <div id="loginCard" class="auth-card">
-                <h2>📸 GalleryApp <span class="test-badge">TEST MODE</span></h2>
+                <h2>📸 GalleryApp <span class="test-badge">LOCAL</span></h2>
                 
-                <!-- Info Testing -->
                 <div class="info-box">
                     <strong>🔑 Data Testing:</strong><br>
                     Username: <strong>123</strong><br>
                     Password: <strong>123</strong><br>
-                    <small>(Klik tombol hijau untuk auto-fill)</small>
+                    <small>(Sudah otomatis terisi)</small>
                 </div>
                 
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="loginUsername" placeholder="Username" value="123">
+                    <input type="text" id="loginUsername" value="123">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Password" value="123">
+                    <input type="password" id="loginPassword" value="123">
                 </div>
                 <button class="btn" id="loginBtn">Login</button>
-                <button class="btn btn-test" id="testLoginBtn">🔑 Login Test (123/123)</button>
+                <button class="btn btn-success" id="testLoginBtn">🔑 Login Test (123/123)</button>
+                <button class="btn btn-warning" id="createTestUserBtn">➕ Buat User Test</button>
                 <div class="auth-link">
                     Belum punya akun? <a href="#" id="showRegisterBtn">Daftar</a>
                 </div>
@@ -286,30 +337,21 @@
 
             <!-- Register Card -->
             <div id="registerCard" class="auth-card" style="display: none;">
-                <h2>📝 Daftar</h2>
-                <div class="info-box">
-                    <strong>📝 Untuk testing cepat:</strong><br>
-                    Gunakan username: test123<br>
-                    Password: test123
-                </div>
+                <h2>📝 Daftar Akun Baru</h2>
                 <div class="input-group">
                     <label>Username</label>
                     <input type="text" id="regUsername" placeholder="Username">
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="regEmail" placeholder="Email">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
                     <input type="password" id="regPassword" placeholder="Password">
                 </div>
                 <div class="input-group">
-                    <label>Konfirmasi</label>
+                    <label>Konfirmasi Password</label>
                     <input type="password" id="regConfirmPassword" placeholder="Konfirmasi">
                 </div>
                 <button class="btn" id="registerBtn">Daftar</button>
-                <button class="btn btn-secondary" id="backToLoginBtn">Kembali</button>
+                <button class="btn btn-warning" id="backToLoginBtn">Kembali ke Login</button>
             </div>
         </div>
 
@@ -329,7 +371,7 @@
             </nav>
 
             <div class="content">
-                <!-- Home -->
+                <!-- Home Page -->
                 <div id="homePage">
                     <div class="page-header"><h2>📸 Semua Foto</h2></div>
                     <div id="galleryContainer" class="gallery-grid">
@@ -337,7 +379,7 @@
                     </div>
                 </div>
 
-                <!-- My Photos -->
+                <!-- My Photos Page -->
                 <div id="myPhotosPage" style="display: none;">
                     <div class="page-header"><h2>🖼️ Fotoku</h2></div>
                     <div id="myPhotosContainer" class="gallery-grid">
@@ -345,10 +387,10 @@
                     </div>
                 </div>
 
-                <!-- Upload -->
+                <!-- Upload Page -->
                 <div id="uploadPage" style="display: none;">
                     <div class="upload-section">
-                        <h3>📤 Upload Foto</h3>
+                        <h3>📤 Upload Foto Baru</h3>
                         <div class="file-upload" id="fileUploadArea">
                             <p>Klik untuk pilih foto</p>
                             <input type="file" id="fileInput" accept="image/*">
@@ -362,121 +404,56 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Edit Caption</h3>
+            <textarea id="editCaption" rows="4"></textarea>
+            <button class="btn" id="saveEditBtn">Simpan</button>
+            <button class="btn btn-warning" id="cancelEditBtn">Batal</button>
+        </div>
+    </div>
+
     <script>
-        // ================== KONFIGURASI ==================
-        const SUPABASE_URL = 'https://athsijudenxngliekkbm.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
-
-        // Inisialisasi Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Global variables
+        // ================== INITIALIZATION ==================
+        // Data storage
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
         let currentUser = null;
+        let currentEditId = null;
 
-        // ================== CEK KONEKSI ==================
-        window.addEventListener('load', async function() {
-            console.log('✅ Halaman dimuat!');
+        // ================== CREATE DEFAULT TEST USER ==================
+        function createTestUser() {
+            // Cek apakah user 123 sudah ada
+            const existingUser = users.find(u => u.username === '123');
             
-            Swal.fire({
-                title: '📸 GalleryApp',
-                text: 'Mengecek koneksi database...',
-                icon: 'info',
-                timer: 2000,
-                showConfirmButton: false
-            });
-
-            try {
-                // Test koneksi
-                const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: '⚠️ Tabel Belum Ada',
-                            text: 'Koneksi database berhasil, tapi tabel belum dibuat.',
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '❌ Koneksi Gagal',
-                            text: error.message
-                        });
-                    }
-                } else {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Database Terkoneksi!',
-                        text: 'Supabase siap digunakan',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Error',
-                    text: err.message
-                });
-            }
-
-            // Cek session
-            checkSession();
-        });
-
-        // ================== FUNGSI UNTUK MEMBUAT USER TEST ==================
-        async function createTestUser() {
-            try {
-                // Cek apakah user 123 sudah ada
-                const { data: existingUser } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', '123')
-                    .maybeSingle();
-
-                if (existingUser) {
-                    console.log('User test sudah ada');
-                    return;
-                }
-
-                // Buat user test di Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: 'test123@gmail.com',
-                    password: '123',
-                    options: {
-                        data: { username: '123' }
-                    }
-                });
-
-                if (authError) {
-                    console.log('Auth error:', authError.message);
-                    return;
-                }
-
-                // Simpan ke tabel users
-                const { error: dbError } = await supabase.from('users').insert([{
-                    id: authData.user.id,
+            if (!existingUser) {
+                users.push({
+                    id: '1',
                     username: '123',
-                    email: 'test123@gmail.com',
-                    full_name: 'Test User'
-                }]);
-
-                if (dbError) {
-                    console.log('DB error:', dbError.message);
-                } else {
-                    console.log('User test berhasil dibuat!');
-                }
-
-            } catch (err) {
-                console.log('Error:', err);
+                    password: '123',
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('✅ User test created: 123 / 123');
             }
         }
 
-        // Panggil fungsi untuk membuat user test
+        // Panggil fungsi untuk buat user test
         createTestUser();
 
-        // ================== LOGIN FUNCTIONS ==================
+        // ================== NOTIFICATION ==================
+        window.addEventListener('load', function() {
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Aplikasi Siap!',
+                text: 'Mode LOCAL - Tidak perlu database',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+
+        // ================== AUTH FUNCTIONS ==================
         document.getElementById('showRegisterBtn').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('loginCard').style.display = 'none';
@@ -488,191 +465,171 @@
             document.getElementById('registerCard').style.display = 'none';
         });
 
-        // Login dengan data 123
-        async function loginWithTestData() {
-            try {
-                Swal.fire({ title: 'Login...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        // Buat user test manual
+        document.getElementById('createTestUserBtn').addEventListener('click', function() {
+            createTestUser();
+            Swal.fire({
+                icon: 'success',
+                title: '✅ User Test Siap!',
+                text: 'Username: 123, Password: 123',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
 
-                // Cari user dengan username 123
-                const { data: userData, error: userError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', '123')
-                    .maybeSingle();
+        // Login
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-                if (!userData) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ User Test Belum Ada',
-                        text: 'Membuat user test dulu...',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    
-                    // Buat user test dulu
-                    await createTestUser();
-                    
-                    // Coba login lagi
-                    setTimeout(() => {
-                        loginWithTestData();
-                    }, 2000);
-                    return;
-                }
-
-                // Login dengan email dari database
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                    email: userData.email,
-                    password: '123'
+            if (!username || !password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Error',
+                    text: 'Username dan password harus diisi!'
                 });
+                return;
+            }
 
-                if (authError) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ Login Gagal',
-                        text: 'Password salah atau user belum terdaftar'
-                    });
-                    return;
-                }
+            // Cari user
+            const user = users.find(u => u.username === username && u.password === password);
 
-                currentUser = userData;
-                
+            if (user) {
+                currentUser = user;
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayUsername').textContent = userData.username;
+                document.getElementById('displayUsername').textContent = user.username;
                 
                 Swal.fire({
                     icon: 'success',
                     title: '✅ Login Berhasil!',
-                    text: `Selamat datang ${userData.username}`,
+                    text: `Selamat datang ${user.username}`,
                     timer: 1500,
                     showConfirmButton: false
                 });
                 
                 loadPosts('all');
-
-            } catch (err) {
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Error',
-                    text: err.message
+                    title: '❌ Login Gagal',
+                    text: 'Username atau password salah!'
                 });
-            }
-        }
-
-        // Login biasa
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                Swal.fire('⚠️', 'Username dan password harus diisi!', 'warning');
-                return;
-            }
-
-            try {
-                Swal.fire({ title: 'Login...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                const { data: userData, error: userError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .maybeSingle();
-
-                if (!userData) {
-                    Swal.fire('❌', 'Username tidak ditemukan!', 'error');
-                    return;
-                }
-
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                    email: userData.email,
-                    password: password
-                });
-
-                if (authError) {
-                    Swal.fire('❌', 'Password salah!', 'error');
-                    return;
-                }
-
-                currentUser = userData;
-                
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayUsername').textContent = userData.username;
-                
-                Swal.fire('✅', `Selamat datang ${userData.username}`, 'success');
-                loadPosts('all');
-
-            } catch (err) {
-                Swal.fire('❌', err.message, 'error');
             }
         });
 
-        // Tombol test login
+        // Test login
         document.getElementById('testLoginBtn').addEventListener('click', function() {
             document.getElementById('loginUsername').value = '123';
             document.getElementById('loginPassword').value = '123';
-            loginWithTestData();
+            
+            const user = users.find(u => u.username === '123' && u.password === '123');
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('displayUsername').textContent = user.username;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Login Test Berhasil!',
+                    text: 'Selamat datang 123',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                
+                loadPosts('all');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Gagal',
+                    text: 'User test belum ada, klik "Buat User Test" dulu'
+                });
+            }
         });
 
         // Register
-        document.getElementById('registerBtn').addEventListener('click', async function() {
+        document.getElementById('registerBtn').addEventListener('click', function() {
             const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirmPassword').value;
 
-            if (!username || !email || !password || !confirm) {
-                Swal.fire('⚠️', 'Semua field harus diisi!', 'warning');
+            if (!username || !password || !confirm) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Error',
+                    text: 'Semua field harus diisi!'
+                });
                 return;
             }
 
             if (password !== confirm) {
-                Swal.fire('❌', 'Password tidak cocok!', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: 'Password tidak cocok!'
+                });
                 return;
             }
 
-            try {
-                Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: { data: { username: username } }
+            // Cek username sudah ada
+            if (users.find(u => u.username === username)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: 'Username sudah digunakan!'
                 });
-
-                if (authError) throw authError;
-
-                const { error: dbError } = await supabase.from('users').insert([{
-                    id: authData.user.id,
-                    username: username,
-                    email: email,
-                    full_name: username
-                }]);
-
-                if (dbError) throw dbError;
-
-                Swal.fire('✅', 'Registrasi berhasil! Silakan login.', 'success');
-                
-                setTimeout(() => {
-                    document.getElementById('loginCard').style.display = 'block';
-                    document.getElementById('registerCard').style.display = 'none';
-                }, 2000);
-
-            } catch (err) {
-                Swal.fire('❌', err.message, 'error');
+                return;
             }
+
+            // Buat user baru
+            const newUser = {
+                id: Date.now().toString(),
+                username: username,
+                password: password,
+                created_at: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Registrasi Berhasil!',
+                text: 'Silakan login',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            // Clear form
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirmPassword').value = '';
+
+            // Balik ke login
+            setTimeout(() => {
+                document.getElementById('loginCard').style.display = 'block';
+                document.getElementById('registerCard').style.display = 'none';
+            }, 1500);
         });
 
         // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async function() {
-            await supabase.auth.signOut();
+        document.getElementById('logoutBtn').addEventListener('click', function() {
             currentUser = null;
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
-            Swal.fire('👋', 'Sampai jumpa lagi!', 'info');
+            
+            Swal.fire({
+                icon: 'info',
+                title: '👋 Logout',
+                text: 'Sampai jumpa lagi!',
+                timer: 1500,
+                showConfirmButton: false
+            });
         });
 
-        // ================== NAVIGASI ==================
+        // ================== NAVIGATION ==================
         document.getElementById('homeNav').addEventListener('click', function() {
             setActiveNav('home');
             document.getElementById('homePage').style.display = 'block';
@@ -694,6 +651,11 @@
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('myPhotosPage').style.display = 'none';
             document.getElementById('uploadPage').style.display = 'block';
+            
+            // Reset upload form
+            document.getElementById('fileInput').value = '';
+            document.getElementById('caption').value = '';
+            document.getElementById('preview').style.display = 'none';
         });
 
         function setActiveNav(page) {
@@ -711,6 +673,26 @@
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Validasi ukuran (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ File Terlalu Besar',
+                        text: 'Maksimal 5MB'
+                    });
+                    return;
+                }
+
+                // Validasi tipe
+                if (!file.type.startsWith('image/')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Bukan Gambar',
+                        text: 'File harus berupa gambar'
+                    });
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('preview').src = e.target.result;
@@ -720,186 +702,233 @@
             }
         });
 
-        document.getElementById('uploadBtn').addEventListener('click', async function() {
+        document.getElementById('uploadBtn').addEventListener('click', function() {
             const file = document.getElementById('fileInput').files[0];
             const caption = document.getElementById('caption').value.trim();
 
             if (!file) {
-                Swal.fire('⚠️', 'Pilih foto dulu!', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Pilih Foto',
+                    text: 'Pilih foto terlebih dahulu!'
+                });
                 return;
             }
 
             if (!caption) {
-                Swal.fire('⚠️', 'Tulis caption!', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Tulis Caption',
+                    text: 'Tulis caption untuk foto!'
+                });
                 return;
             }
 
-            try {
-                Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                const fileName = `${Date.now()}_${file.name}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('gallery')
-                    .upload(`photos/${fileName}`, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(`photos/${fileName}`);
-
-                const { error: postError } = await supabase.from('posts').insert([{
+            // Simpan foto sebagai base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newPost = {
+                    id: Date.now(),
                     user_id: currentUser.id,
-                    image_url: urlData.publicUrl,
-                    image_filename: fileName,
-                    caption: caption
-                }]);
+                    username: currentUser.username,
+                    image: e.target.result,
+                    caption: caption,
+                    likes: [],
+                    created_at: new Date().toLocaleString('id-ID')
+                };
 
-                if (postError) throw postError;
+                posts.unshift(newPost);
+                localStorage.setItem('posts', JSON.stringify(posts));
 
-                Swal.fire('✅', 'Foto berhasil diupload!', 'success');
-                
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Upload Berhasil!',
+                    text: 'Foto berhasil diupload',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Reset form
                 document.getElementById('fileInput').value = '';
                 document.getElementById('caption').value = '';
                 document.getElementById('preview').style.display = 'none';
-                
+
+                // Kembali ke home
                 setTimeout(() => {
                     document.getElementById('homeNav').click();
                 }, 1500);
-
-            } catch (err) {
-                Swal.fire('❌', err.message, 'error');
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         // ================== LOAD POSTS ==================
-        async function loadPosts(type = 'all') {
-            try {
-                let query = supabase
-                    .from('posts')
-                    .select('*, users:user_id(username)')
-                    .order('created_at', { ascending: false });
+        function loadPosts(type = 'all') {
+            const container = type === 'all' ? 
+                document.getElementById('galleryContainer') : 
+                document.getElementById('myPhotosContainer');
 
-                if (type === 'my' && currentUser) {
-                    query = query.eq('user_id', currentUser.id);
-                }
-
-                const { data: posts, error } = await query;
-
-                if (error) throw error;
-
-                const container = type === 'all' ? 
-                    document.getElementById('galleryContainer') : 
-                    document.getElementById('myPhotosContainer');
-
-                if (!posts || posts.length === 0) {
-                    container.innerHTML = '<div class="empty-state">📷 Belum ada foto</div>';
-                    return;
-                }
-
-                let html = '';
-                for (let post of posts) {
-                    let isLiked = false;
-                    if (currentUser) {
-                        const { data: likeData } = await supabase
-                            .from('likes')
-                            .select('*')
-                            .eq('post_id', post.id)
-                            .eq('user_id', currentUser.id)
-                            .maybeSingle();
-                        isLiked = !!likeData;
-                    }
-
-                    html += `
-                        <div class="photo-card" data-post-id="${post.id}">
-                            <img src="${post.image_url}" class="photo-image" onerror="this.src='https://via.placeholder.com/300?text=Error'">
-                            <div class="photo-details">
-                                <div class="photo-header">
-                                    <span class="photo-author">👤 ${post.users?.username || 'Unknown'}</span>
-                                    <span>${new Date(post.created_at).toLocaleDateString('id-ID')}</span>
-                                </div>
-                                <p>${post.caption}</p>
-                                <div class="photo-stats">❤️ ${post.likes_count || 0} likes</div>
-                                ${currentUser ? `
-                                    <div class="photo-actions">
-                                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
-                                            ${isLiked ? '❤️ Unlike' : '🤍 Like'}
-                                        </button>
-                                        ${post.user_id === currentUser.id ? 
-                                            `<button class="delete-btn" onclick="deletePost('${post.id}')">🗑️ Hapus</button>` : ''
-                                        }
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = html;
-
-            } catch (err) {
-                console.error('Error loading posts:', err);
+            let filteredPosts = [...posts];
+            
+            if (type === 'my' && currentUser) {
+                filteredPosts = posts.filter(p => p.user_id === currentUser.id);
             }
-        }
 
-        // ================== LIKE & DELETE ==================
-        window.toggleLike = async function(postId) {
-            if (!currentUser) {
-                Swal.fire('⚠️', 'Login dulu!', 'warning');
+            if (filteredPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        📷 Belum ada foto<br>
+                        <small>Klik Upload untuk menambah foto</small>
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                const { data: existing } = await supabase
-                    .from('likes')
-                    .select('*')
-                    .eq('post_id', postId)
-                    .eq('user_id', currentUser.id)
-                    .maybeSingle();
+            let html = '';
+            filteredPosts.forEach(post => {
+                const isLiked = post.likes && post.likes.includes(currentUser?.id);
+                const isOwner = currentUser && post.user_id === currentUser.id;
 
-                if (existing) {
-                    await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-                } else {
-                    await supabase.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
-                }
+                html += `
+                    <div class="photo-card" data-post-id="${post.id}">
+                        <img src="${post.image}" class="photo-image">
+                        <div class="photo-details">
+                            <div class="photo-header">
+                                <span class="photo-author">👤 ${post.username}</span>
+                                <span>${post.created_at}</span>
+                            </div>
+                            <p class="photo-caption">${post.caption}</p>
+                            <div class="photo-stats">❤️ ${post.likes ? post.likes.length : 0} likes</div>
+                            ${currentUser ? `
+                                <div class="photo-actions">
+                                    <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                                        ${isLiked ? '❤️ Unlike' : '🤍 Like'}
+                                    </button>
+                                    ${isOwner ? `
+                                        <button class="edit-btn" onclick="openEditModal('${post.id}')">✏️ Edit</button>
+                                        <button class="delete-btn" onclick="deletePost('${post.id}')">🗑️ Hapus</button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
 
-                const activeNav = document.querySelector('.nav-item.active').id;
-                if (activeNav === 'homeNav') loadPosts('all');
-                else if (activeNav === 'myPhotosNav') loadPosts('my');
-
-            } catch (err) {
-                console.error('Like error:', err);
-            }
-        };
-
-        window.deletePost = async function(postId) {
-            if (!confirm('Hapus foto ini?')) return;
-
-            try {
-                await supabase.from('posts').delete().eq('id', postId).eq('user_id', currentUser.id);
-                Swal.fire('✅', 'Foto dihapus!', 'success');
-                
-                const activeNav = document.querySelector('.nav-item.active').id;
-                if (activeNav === 'homeNav') loadPosts('all');
-                else if (activeNav === 'myPhotosNav') loadPosts('my');
-
-            } catch (err) {
-                Swal.fire('❌', err.message, 'error');
-            }
-        };
-
-        // ================== CHECK SESSION ==================
-        async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data } = await supabase.from('users').select('*').eq('id', session.user.id).single();
-                if (data) {
-                    currentUser = data;
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    document.getElementById('displayUsername').textContent = data.username;
-                    loadPosts('all');
-                }
-            }
+            container.innerHTML = html;
         }
+
+        // ================== LIKE FUNCTION ==================
+        window.toggleLike = function(postId) {
+            const post = posts.find(p => p.id == postId);
+            if (post) {
+                if (!post.likes) post.likes = [];
+                
+                const index = post.likes.indexOf(currentUser.id);
+                if (index === -1) {
+                    post.likes.push(currentUser.id);
+                } else {
+                    post.likes.splice(index, 1);
+                }
+                
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                // Reload posts
+                const activeNav = document.querySelector('.nav-item.active').id;
+                if (activeNav === 'homeNav') loadPosts('all');
+                else if (activeNav === 'myPhotosNav') loadPosts('my');
+            }
+        };
+
+        // ================== EDIT FUNCTION ==================
+        window.openEditModal = function(postId) {
+            const post = posts.find(p => p.id == postId);
+            if (post && post.user_id === currentUser.id) {
+                currentEditId = postId;
+                document.getElementById('editCaption').value = post.caption;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        };
+
+        document.getElementById('saveEditBtn').addEventListener('click', function() {
+            const newCaption = document.getElementById('editCaption').value.trim();
+            if (!newCaption) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Error',
+                    text: 'Caption tidak boleh kosong!'
+                });
+                return;
+            }
+
+            const post = posts.find(p => p.id == currentEditId);
+            if (post) {
+                post.caption = newCaption;
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                document.getElementById('editModal').style.display = 'none';
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Berhasil',
+                    text: 'Caption diupdate!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Reload posts
+                const activeNav = document.querySelector('.nav-item.active').id;
+                if (activeNav === 'homeNav') loadPosts('all');
+                else if (activeNav === 'myPhotosNav') loadPosts('my');
+            }
+        });
+
+        document.getElementById('cancelEditBtn').addEventListener('click', function() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+        });
+
+        // ================== DELETE FUNCTION ==================
+        window.deletePost = function(postId) {
+            Swal.fire({
+                title: 'Hapus Foto?',
+                text: 'Foto yang dihapus tidak dapat dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const index = posts.findIndex(p => p.id == postId);
+                    if (index !== -1) {
+                        posts.splice(index, 1);
+                        localStorage.setItem('posts', JSON.stringify(posts));
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: '✅ Terhapus!',
+                            text: 'Foto berhasil dihapus',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Reload posts
+                        const activeNav = document.querySelector('.nav-item.active').id;
+                        if (activeNav === 'homeNav') loadPosts('all');
+                        else if (activeNav === 'myPhotosNav') loadPosts('my');
+                    }
+                }
+            });
+        };
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('editModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                currentEditId = null;
+            }
+        });
     </script>
 </body>
 </html>
