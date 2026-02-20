@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - Supabase Integration</title>
+    <title>GalleryApp - Supabase Gallery</title>
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         * {
             margin: 0;
@@ -23,7 +30,7 @@
             padding: 20px;
         }
 
-        /* Auth Container */
+        /* Auth Pages */
         .auth-container {
             display: flex;
             justify-content: center;
@@ -122,52 +129,6 @@
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
-        }
-
-        /* Alert Messages */
-        .alert-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 350px;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            color: white;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .alert.success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-
-        .alert.error {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        }
-
-        .alert.warning {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-        }
-
-        .alert.info {
-            background: linear-gradient(135deg, #17a2b8 0%, #0dcaf0 100%);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
         }
 
         /* Main App */
@@ -492,42 +453,6 @@
             display: block;
         }
 
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .navbar {
@@ -553,20 +478,14 @@
             }
         }
     </style>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Alert Container -->
-    <div id="alertContainer" class="alert-container"></div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p id="loadingMessage">Loading...</p>
-        </div>
-    </div>
-
     <div class="app-container">
         <!-- Auth Container -->
         <div id="authContainer" class="auth-container">
@@ -670,77 +589,216 @@
         // =====================================================
         // SUPABASE CONFIGURATION
         // =====================================================
-        const supabaseUrl = 'https://athsijudenxngliekkbm.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
-        
+        const SUPABASE_CONFIG = {
+            url: 'https://athsijudenxngliekkbm.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY'
+        };
+
         // Initialize Supabase client
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
         // Global variables
         let currentUser = null;
-        let currentEditId = null;
+        let connectionChecked = false;
 
         // =====================================================
-        // ALERT FUNCTIONS
+        // DATABASE CONNECTION CHECK
         // =====================================================
-        function showAlert(message, type = 'info', duration = 3000) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${type}`;
-            alertDiv.textContent = message;
-            
-            alertContainer.appendChild(alertDiv);
-            
-            // Auto remove after duration
-            setTimeout(() => {
-                alertDiv.style.animation = 'slideIn 0.3s reverse';
-                setTimeout(() => {
-                    alertContainer.removeChild(alertDiv);
-                }, 300);
-            }, duration);
-        }
-
-        // =====================================================
-        // LOADING FUNCTIONS
-        // =====================================================
-        function showLoading(message = 'Loading...') {
-            document.getElementById('loadingMessage').textContent = message;
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        // =====================================================
-        // CONNECTION TEST
-        // =====================================================
-        async function testConnection() {
+        async function checkDatabaseConnection() {
             try {
-                showLoading('Menguji koneksi ke database...');
-                const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                        showAlert('Tabel belum dibuat! Silakan jalankan SQL di Supabase', 'error', 5000);
+                // Tampilkan loading
+                Swal.fire({
+                    title: 'Mengecek Koneksi Database...',
+                    html: 'Menghubungkan ke Supabase...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Coba koneksi ke database dengan timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), 10000)
+                );
+
+                const connectionPromise = supabase
+                    .from('users')
+                    .select('count', { count: 'exact', head: true });
+
+                const result = await Promise.race([connectionPromise, timeoutPromise]);
+
+                // Tutup loading
+                Swal.close();
+
+                if (result.error) {
+                    // Cek jenis error
+                    if (result.error.message.includes('relation') && result.error.message.includes('does not exist')) {
+                        // Tabel belum dibuat
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Database Terhubung Tapi Tabel Belum Ada',
+                            html: `
+                                <div style="text-align: left;">
+                                    <p>✅ Koneksi ke Supabase berhasil!</p>
+                                    <p>⚠️ Tabel database belum dibuat.</p>
+                                    <p style="margin-top: 15px;"><strong>Langkah yang harus dilakukan:</strong></p>
+                                    <ol style="margin-left: 20px;">
+                                        <li>Buka Supabase Dashboard</li>
+                                        <li>Klik SQL Editor</li>
+                                        <li>Jalankan SQL untuk membuat tabel</li>
+                                    </ol>
+                                    <p style="margin-top: 15px;">Klik tombol di bawah untuk melihat SQL yang diperlukan.</p>
+                                </div>
+                            `,
+                            confirmButtonText: 'Lihat SQL',
+                            showCancelButton: true,
+                            cancelButtonText: 'Nanti'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'SQL untuk Membuat Tabel',
+                                    html: `
+                                        <div style="text-align: left; background: #f5f5f5; padding: 15px; border-radius: 10px; overflow-x: auto;">
+                                            <pre style="font-size: 12px;">
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    avatar_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.posts (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    image_filename TEXT,
+    caption TEXT,
+    likes_count INTEGER DEFAULT 0,
+    comments_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.comments (
+    id BIGSERIAL PRIMARY KEY,
+    post_id BIGINT NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.likes (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    post_id BIGINT NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT unique_like UNIQUE (user_id, post_id)
+);
+                                            </pre>
+                                        </div>
+                                    `,
+                                    confirmButtonText: 'Saya sudah menjalankan SQL',
+                                    showCancelButton: true,
+                                    cancelButtonText: 'Tutup'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        checkDatabaseConnection(); // Cek ulang
+                                    }
+                                });
+                            }
+                        });
                     } else {
-                        showAlert('Koneksi database gagal: ' + error.message, 'error', 5000);
+                        // Error lain
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Database Gagal!',
+                            html: `
+                                <div style="text-align: left;">
+                                    <p>Tidak dapat terhubung ke database Supabase.</p>
+                                    <p style="color: #e74c3c; margin-top: 10px;">Error: ${result.error.message}</p>
+                                    <p style="margin-top: 15px;"><strong>Solusi:</strong></p>
+                                    <ul style="margin-left: 20px;">
+                                        <li>Periksa URL dan API Key</li>
+                                        <li>Pastikan project Supabase aktif</li>
+                                        <li>Cek koneksi internet</li>
+                                    </ul>
+                                </div>
+                            `,
+                            confirmButtonText: 'Coba Lagi',
+                            showCancelButton: true,
+                            cancelButtonText: 'Tutup'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                checkDatabaseConnection(); // Coba lagi
+                            }
+                        });
                     }
                     return false;
                 }
+
+                // Koneksi berhasil dan tabel sudah ada
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Koneksi Database Berhasil! ✅',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>✓ Terhubung ke Supabase</p>
+                            <p>✓ Database siap digunakan</p>
+                            <p style="margin-top: 15px; color: #27ae60;">Silakan login atau register untuk memulai!</p>
+                        </div>
+                    `,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
                 
-                showAlert('Koneksi database berhasil! ✅', 'success', 2000);
                 return true;
+
             } catch (error) {
-                showAlert('Error koneksi: ' + error.message, 'error', 5000);
+                Swal.close();
+                
+                if (error.message === 'Timeout') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Koneksi Timeout!',
+                        html: `
+                            <div style="text-align: left;">
+                                <p>Koneksi ke database terlalu lama.</p>
+                                <p style="margin-top: 10px;"><strong>Kemungkinan penyebab:</strong></p>
+                                <ul style="margin-left: 20px;">
+                                    <li>Koneksi internet lambat</li>
+                                    <li>Server Supabase sedang sibuk</li>
+                                    <li>Firewall memblokir koneksi</li>
+                                </ul>
+                            </div>
+                        `,
+                        confirmButtonText: 'Coba Lagi',
+                        showCancelButton: true,
+                        cancelButtonText: 'Tutup'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            checkDatabaseConnection();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Koneksi!',
+                        text: error.message,
+                        confirmButtonText: 'Coba Lagi'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            checkDatabaseConnection();
+                        }
+                    });
+                }
                 return false;
-            } finally {
-                hideLoading();
             }
         }
 
         // =====================================================
-        // AUTH FUNCTIONS
+        // AUTH FUNCTIONS WITH SWEET ALERT
         // =====================================================
 
         // Show register form
@@ -764,32 +822,69 @@
 
             // Validasi input
             if (!username || !email || !password || !confirmPass) {
-                showAlert('Semua field harus diisi!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Semua field harus diisi!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             if (username.length < 3) {
-                showAlert('Username minimal 3 karakter!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Username Terlalu Pendek',
+                    text: 'Username minimal 3 karakter!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             if (!email.includes('@') || !email.includes('.')) {
-                showAlert('Email tidak valid!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Email Tidak Valid',
+                    text: 'Masukkan email yang benar!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             if (password.length < 6) {
-                showAlert('Password minimal 6 karakter!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Terlalu Pendek',
+                    text: 'Password minimal 6 karakter!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             if (password !== confirmPass) {
-                showAlert('Password tidak cocok!', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Tidak Cocok',
+                    text: 'Password dan konfirmasi password harus sama!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             try {
-                showLoading('Mendaftarkan akun...');
+                Swal.fire({
+                    title: 'Mendaftarkan Akun...',
+                    html: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 // Cek apakah username sudah ada
                 const { data: existingUser, error: checkError } = await supabase
@@ -798,13 +893,14 @@
                     .eq('username', username)
                     .maybeSingle();
 
-                if (checkError && !checkError.message.includes('relation')) {
-                    throw checkError;
-                }
-
                 if (existingUser) {
-                    hideLoading();
-                    showAlert('Username sudah digunakan!', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Registrasi Gagal',
+                        text: 'Username sudah digunakan!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
@@ -814,26 +910,19 @@
                     password: password,
                     options: {
                         data: {
-                            username: username,
-                            full_name: username
+                            username: username
                         }
                     }
                 });
 
                 if (authError) {
-                    hideLoading();
-                    
-                    if (authError.message.includes('User already registered')) {
-                        showAlert('Email sudah terdaftar!', 'error');
-                    } else {
-                        showAlert('Error registrasi: ' + authError.message, 'error');
-                    }
-                    return;
-                }
-
-                if (!authData.user) {
-                    hideLoading();
-                    showAlert('Gagal membuat akun', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Registrasi Gagal',
+                        text: authError.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
@@ -851,31 +940,43 @@
                     ]);
 
                 if (dbError) {
-                    // Rollback: hapus user dari auth jika gagal insert ke tabel
+                    // Rollback: hapus user dari auth
                     await supabase.auth.admin.deleteUser(authData.user.id);
                     
-                    if (dbError.message.includes('relation') && dbError.message.includes('does not exist')) {
-                        showAlert('Tabel users belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Error database: ' + dbError.message, 'error');
-                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Registrasi Gagal',
+                        text: 'Gagal menyimpan data user: ' + dbError.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
-                showAlert('Registrasi berhasil! Silakan login.', 'success');
-                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registrasi Berhasil!',
+                    text: 'Silakan login dengan akun Anda',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
                 // Clear form
                 document.getElementById('regUsername').value = '';
                 document.getElementById('regEmail').value = '';
                 document.getElementById('regPassword').value = '';
                 document.getElementById('regConfirmPassword').value = '';
                 
-                setTimeout(() => showLogin(), 1500);
+                setTimeout(() => showLogin(), 2000);
 
             } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             }
         }
 
@@ -885,12 +986,25 @@
             const password = document.getElementById('loginPassword').value;
 
             if (!username || !password) {
-                showAlert('Username dan password harus diisi!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Username dan password harus diisi!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             try {
-                showLoading('Login...');
+                Swal.fire({
+                    title: 'Login...',
+                    html: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 // Cari user berdasarkan username
                 const { data: userData, error: userError } = await supabase
@@ -899,17 +1013,14 @@
                     .eq('username', username)
                     .maybeSingle();
 
-                if (userError) {
-                    if (userError.message.includes('relation') && userError.message.includes('does not exist')) {
-                        showAlert('Tabel users belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Error database: ' + userError.message, 'error');
-                    }
-                    return;
-                }
-
                 if (!userData) {
-                    showAlert('Username tidak ditemukan!', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Gagal',
+                        text: 'Username tidak ditemukan!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
@@ -920,11 +1031,13 @@
                 });
 
                 if (authError) {
-                    if (authError.message.includes('Invalid login credentials')) {
-                        showAlert('Password salah!', 'error');
-                    } else {
-                        showAlert('Login gagal: ' + authError.message, 'error');
-                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Gagal',
+                        text: 'Password salah!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
@@ -935,11 +1048,6 @@
                     .eq('id', authData.user.id)
                     .single();
 
-                if (fetchError) {
-                    showAlert('Error mengambil data user', 'error');
-                    return;
-                }
-
                 currentUser = fullUserData;
                 
                 // Update UI
@@ -947,7 +1055,13 @@
                 document.getElementById('mainApp').style.display = 'block';
                 document.getElementById('displayUsername').textContent = fullUserData.username;
                 
-                showAlert(`Selamat datang, ${fullUserData.username}!`, 'success');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Berhasil!',
+                    text: `Selamat datang, ${fullUserData.username}!`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 
                 // Clear login form
                 document.getElementById('loginUsername').value = '';
@@ -957,72 +1071,49 @@
                 showPage('home');
 
             } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             }
         }
 
         // Handle logout
         async function handleLogout() {
             try {
-                showLoading('Logout...');
+                Swal.fire({
+                    title: 'Logout...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 await supabase.auth.signOut();
                 currentUser = null;
+                
                 document.getElementById('authContainer').style.display = 'flex';
                 document.getElementById('mainApp').style.display = 'none';
-                showAlert('Anda telah logout', 'success');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Logout Berhasil',
+                    text: 'Sampai jumpa lagi!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
             } catch (error) {
-                showAlert('Error logout: ' + error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Check session on load
-        async function checkSession() {
-            try {
-                showLoading('Memeriksa session...');
-                
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                if (sessionError) {
-                    showAlert('Error session: ' + sessionError.message, 'error');
-                    return;
-                }
-                
-                if (session) {
-                    const { data: userData, error: userError } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (userError) {
-                        if (userError.message.includes('relation') && userError.message.includes('does not exist')) {
-                            showAlert('Tabel users belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                        } else {
-                            showAlert('Error mengambil data user: ' + userError.message, 'error');
-                        }
-                        return;
-                    }
-
-                    if (userData) {
-                        currentUser = userData;
-                        document.getElementById('authContainer').style.display = 'none';
-                        document.getElementById('mainApp').style.display = 'block';
-                        document.getElementById('displayUsername').textContent = userData.username;
-                        showPage('home');
-                        showAlert(`Selamat datang kembali, ${userData.username}!`, 'success');
-                    }
-                } else {
-                    // Test koneksi database
-                    await testConnection();
-                }
-            } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         }
 
@@ -1069,13 +1160,25 @@
             if (file) {
                 // Validasi tipe file
                 if (!file.type.startsWith('image/')) {
-                    showAlert('File harus berupa gambar!', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Tidak Valid',
+                        text: 'File harus berupa gambar!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
                 // Validasi ukuran file (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
-                    showAlert('Ukuran file maksimal 5MB!', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ukuran File Terlalu Besar',
+                        text: 'Maksimal ukuran file 5MB!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     return;
                 }
 
@@ -1098,18 +1201,37 @@
             const caption = document.getElementById('caption').value.trim();
 
             if (!fileInput.files[0]) {
-                showAlert('Pilih foto terlebih dahulu!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Foto',
+                    text: 'Pilih foto terlebih dahulu!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             if (!caption) {
-                showAlert('Tulis caption untuk foto!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tulis Caption',
+                    text: 'Tulis caption untuk foto!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
-            showLoading('Uploading...');
-
             try {
+                Swal.fire({
+                    title: 'Uploading...',
+                    html: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 const file = fileInput.files[0];
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -1118,19 +1240,9 @@
                 // Upload ke Supabase Storage
                 const { error: uploadError } = await supabase.storage
                     .from('gallery')
-                    .upload(filePath, file, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                    .upload(filePath, file);
 
-                if (uploadError) {
-                    if (uploadError.message.includes('bucket') && uploadError.message.includes('not found')) {
-                        showAlert('Bucket gallery belum dibuat! Buat di Supabase Storage', 'error', 5000);
-                    } else {
-                        showAlert('Gagal upload: ' + uploadError.message, 'error');
-                    }
-                    return;
-                }
+                if (uploadError) throw uploadError;
 
                 // Get public URL
                 const { data: urlData } = supabase.storage
@@ -1151,38 +1263,37 @@
                         }
                     ]);
 
-                if (postError) {
-                    if (postError.message.includes('relation') && postError.message.includes('does not exist')) {
-                        showAlert('Tabel posts belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Gagal simpan ke database: ' + postError.message, 'error');
-                    }
-                    return;
-                }
+                if (postError) throw postError;
 
-                showAlert('Foto berhasil diupload!', 'success');
-                
-                // Reset form dan kembali ke home
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Upload Berhasil!',
+                    text: 'Foto berhasil diupload',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Reset form
                 document.getElementById('fileInput').value = '';
                 document.getElementById('caption').value = '';
                 document.getElementById('preview').style.display = 'none';
                 
-                setTimeout(() => {
-                    showPage('home');
-                }, 1500);
+                setTimeout(() => showPage('home'), 1500);
 
             } catch (error) {
-                showAlert('Gagal upload: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload Gagal',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             }
         }
 
         // Load posts
         async function loadPosts(type = 'all') {
             try {
-                showLoading('Loading posts...');
-
                 let query = supabase
                     .from('posts')
                     .select(`
@@ -1202,11 +1313,7 @@
                 const { data: posts, error } = await query;
 
                 if (error) {
-                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                        showAlert('Tabel posts belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Error load posts: ' + error.message, 'error');
-                    }
+                    console.error('Error loading posts:', error);
                     return;
                 }
 
@@ -1217,7 +1324,7 @@
                 if (!posts || posts.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <i>📷</i>
+                            <i class="fas fa-images"></i>
                             <h3>Belum ada foto</h3>
                             <p>${type === 'all' ? 'Upload foto pertamamu sekarang!' : 'Kamu belum upload foto'}</p>
                         </div>
@@ -1300,9 +1407,7 @@
                 container.innerHTML = html;
 
             } catch (error) {
-                showAlert('Gagal load posts: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                console.error('Error:', error);
             }
         }
 
@@ -1316,39 +1421,32 @@
         // Toggle like
         async function toggleLike(postId) {
             if (!currentUser) {
-                showAlert('Login dulu untuk like!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Dulu',
+                    text: 'Silakan login untuk like foto',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
             try {
-                showLoading('Processing...');
-
                 // Check if already liked
-                const { data: existingLike, error: checkError } = await supabase
+                const { data: existingLike } = await supabase
                     .from('likes')
                     .select('*')
                     .eq('post_id', postId)
                     .eq('user_id', currentUser.id)
                     .maybeSingle();
 
-                if (checkError) {
-                    if (checkError.message.includes('relation') && checkError.message.includes('does not exist')) {
-                        showAlert('Tabel likes belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Error: ' + checkError.message, 'error');
-                    }
-                    return;
-                }
-
                 if (existingLike) {
                     // Unlike
-                    const { error: deleteError } = await supabase
+                    await supabase
                         .from('likes')
                         .delete()
                         .eq('post_id', postId)
                         .eq('user_id', currentUser.id);
-
-                    if (deleteError) throw deleteError;
 
                     // Update likes count
                     const { data: post } = await supabase
@@ -1364,14 +1462,12 @@
 
                 } else {
                     // Like
-                    const { error: insertError } = await supabase
+                    await supabase
                         .from('likes')
                         .insert([{ 
                             post_id: postId, 
                             user_id: currentUser.id 
                         }]);
-
-                    if (insertError) throw insertError;
 
                     // Update likes count
                     const { data: post } = await supabase
@@ -1394,19 +1490,21 @@
                     await loadPosts('my');
                 }
 
-                showAlert(existingLike ? 'Unlike berhasil' : 'Like berhasil', 'success');
-
             } catch (error) {
-                showAlert('Error: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                console.error('Error:', error);
             }
         }
 
         // Add comment
         async function addComment(postId) {
             if (!currentUser) {
-                showAlert('Login dulu untuk comment!', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Dulu',
+                    text: 'Silakan login untuk komentar',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
@@ -1416,25 +1514,14 @@
             if (!content) return;
 
             try {
-                showLoading('Mengirim komentar...');
-
                 // Insert comment
-                const { error: commentError } = await supabase
+                await supabase
                     .from('comments')
                     .insert([{
                         post_id: postId,
                         user_id: currentUser.id,
                         content: content
                     }]);
-
-                if (commentError) {
-                    if (commentError.message.includes('relation') && commentError.message.includes('does not exist')) {
-                        showAlert('Tabel comments belum dibuat! Jalankan SQL di Supabase', 'error', 5000);
-                    } else {
-                        showAlert('Gagal comment: ' + commentError.message, 'error');
-                    }
-                    return;
-                }
 
                 // Update comments count
                 const { data: post } = await supabase
@@ -1458,50 +1545,63 @@
                     await loadPosts('my');
                 }
 
-                showAlert('Komentar berhasil ditambahkan', 'success');
-
             } catch (error) {
-                showAlert('Gagal comment: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                console.error('Error:', error);
             }
         }
 
         // Delete post
         async function deletePost(postId) {
-            if (!confirm('Yakin ingin menghapus foto ini?')) return;
+            const result = await Swal.fire({
+                title: 'Hapus Foto?',
+                text: 'Foto yang dihapus tidak dapat dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            });
+
+            if (!result.isConfirmed) return;
 
             try {
-                showLoading('Menghapus...');
+                Swal.fire({
+                    title: 'Menghapus...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 // Get post data to delete image from storage
-                const { data: post, error: fetchError } = await supabase
+                const { data: post } = await supabase
                     .from('posts')
                     .select('image_filename')
                     .eq('id', postId)
                     .single();
 
-                if (fetchError) throw fetchError;
-
                 // Delete from storage
                 if (post?.image_filename) {
-                    const { error: storageError } = await supabase.storage
+                    await supabase.storage
                         .from('gallery')
                         .remove([`photos/${post.image_filename}`]);
-
-                    if (storageError) console.error('Storage delete error:', storageError);
                 }
 
                 // Delete from database
-                const { error: deleteError } = await supabase
+                await supabase
                     .from('posts')
                     .delete()
                     .eq('id', postId)
                     .eq('user_id', currentUser.id);
 
-                if (deleteError) throw deleteError;
-
-                showAlert('Foto berhasil dihapus!', 'success');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil Dihapus!',
+                    text: 'Foto telah dihapus',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
 
                 // Refresh posts
                 const activePage = document.querySelector('.nav-item.active').textContent;
@@ -1512,30 +1612,62 @@
                 }
 
             } catch (error) {
-                showAlert('Gagal hapus: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Hapus',
+                    text: error.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         }
 
-        // =====================================================
-        // INITIALIZATION
-        // =====================================================
-
         // Check session on load
-        checkSession();
-
-        // Auto refresh posts every 30 seconds
-        setInterval(() => {
-            if (currentUser) {
-                const activePage = document.querySelector('.nav-item.active')?.textContent;
-                if (activePage?.includes('Beranda')) {
-                    loadPosts('all');
-                } else if (activePage?.includes('Fotoku')) {
-                    loadPosts('my');
-                }
+        async function checkSession() {
+            // Cek koneksi database dulu
+            const isConnected = await checkDatabaseConnection();
+            
+            if (!isConnected) {
+                // Jika koneksi gagal, tampilkan pesan dan disable form
+                document.querySelectorAll('input, button').forEach(el => {
+                    el.disabled = true;
+                });
+                return;
             }
-        }, 30000);
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    const { data: userData } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (userData) {
+                        currentUser = userData;
+                        document.getElementById('authContainer').style.display = 'none';
+                        document.getElementById('mainApp').style.display = 'block';
+                        document.getElementById('displayUsername').textContent = userData.username;
+                        showPage('home');
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Selamat Datang Kembali!',
+                            text: `Halo ${userData.username}`,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // Initialize
+        checkSession();
     </script>
 </body>
 </html>
