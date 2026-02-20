@@ -343,17 +343,6 @@
             flex: 1;
         }
 
-        .comment-btn {
-            padding: 8px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
-        }
-
         .edit-btn {
             padding: 8px;
             background: #f39c12;
@@ -709,9 +698,11 @@
 
     <script>
         // ================== KONFIGURASI ==================
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api' 
-            : '/api';  // Untuk production di Vercel
+        // Ubah ini sesuai dengan URL backend Anda
+        // Untuk local development:
+        const API_URL = 'http://localhost:3000/api';
+        // Untuk production (Vercel), gunakan relative URL:
+        // const API_URL = '/api';
 
         let currentUser = null;
         let currentEditId = null;
@@ -727,14 +718,39 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
+        // Fungsi aman untuk fetch JSON
+        async function safeFetch(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                
+                // Cek apakah response OK (status 200-299)
+                if (!response.ok) {
+                    // Coba ambil teks response untuk error
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+                }
+                
+                // Coba parse JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return await response.json();
+                } else {
+                    // Jika bukan JSON, ambil teks
+                    const text = await response.text();
+                    throw new Error('Response bukan JSON: ' + text.substring(0, 100));
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+
         // ================== CEK KONEKSI ==================
         async function checkConnection() {
             try {
                 showLoading('Mengecek koneksi database...');
                 
-                const response = await fetch(`${API_URL}/test`);
-                const data = await response.json();
-
+                const data = await safeFetch(`${API_URL}/test`);
                 hideLoading();
 
                 if (data.success) {
@@ -749,15 +765,16 @@
                     Swal.fire({
                         icon: 'error',
                         title: '❌ Koneksi Gagal',
-                        text: data.message
+                        text: data.message || 'Unknown error'
                     });
                 }
             } catch (error) {
                 hideLoading();
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Error',
-                    text: 'Tidak dapat terhubung ke server: ' + error.message
+                    title: '❌ Tidak Dapat Terhubung ke Server',
+                    text: error.message,
+                    footer: 'Pastikan backend sudah berjalan di ' + API_URL
                 });
             }
         }
@@ -787,13 +804,12 @@
             try {
                 showLoading('Login...');
 
-                const response = await fetch(`${API_URL}/login`, {
+                const data = await safeFetch(`${API_URL}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
                 hideLoading();
 
                 if (data.success) {
@@ -851,13 +867,12 @@
             try {
                 showLoading('Mendaftar...');
 
-                const response = await fetch(`${API_URL}/register`, {
+                const data = await safeFetch(`${API_URL}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, email, password })
                 });
 
-                const data = await response.json();
                 hideLoading();
 
                 if (data.success) {
@@ -982,6 +997,12 @@
                     body: formData
                 });
 
+                // Cek response
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+                }
+
                 const data = await response.json();
                 hideLoading();
 
@@ -1020,14 +1041,9 @@
                     url = `${API_URL}/posts/user/${currentUser.id}`;
                 }
 
-                const response = await fetch(url);
-                const data = await response.json();
+                const data = await safeFetch(url);
 
                 hideLoading();
-
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
 
                 const container = type === 'all' ? 
                     document.getElementById('galleryContainer') : 
@@ -1046,13 +1062,6 @@
 
                 let html = '';
                 for (let post of data.posts) {
-                    let isLiked = false;
-                    
-                    // Cek like status jika user login
-                    if (currentUser && token) {
-                        // Ini akan diimplementasikan di backend nanti
-                    }
-
                     html += `
                         <div class="photo-card">
                             <img src="${post.image_url}" class="photo-image" onerror="this.src='https://via.placeholder.com/300?text=Error'">
@@ -1068,8 +1077,8 @@
                                 </div>
                                 ${currentUser ? `
                                     <div class="photo-actions">
-                                        <button class="like-btn" onclick="toggleLike(${post.id})">
-                                            🤍 Like
+                                        <button class="like-btn ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                                            ${post.is_liked ? '❤️ Unlike' : '🤍 Like'}
                                         </button>
                                         ${post.user_id === currentUser.id ? 
                                             `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : 
@@ -1087,7 +1096,10 @@
             } catch (error) {
                 hideLoading();
                 console.error('Error loading posts:', error);
-                document.getElementById('galleryContainer').innerHTML = `
+                const container = type === 'all' ? 
+                    document.getElementById('galleryContainer') : 
+                    document.getElementById('myPhotosContainer');
+                container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <h3>Error loading posts</h3>
@@ -1105,14 +1117,12 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/like/${postId}`, {
+                const data = await safeFetch(`${API_URL}/like/${postId}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
-                const data = await response.json();
 
                 if (data.success) {
                     const activeNav = document.querySelector('.nav-item.active').id;
@@ -1121,6 +1131,7 @@
                 }
             } catch (error) {
                 console.error('Like error:', error);
+                Swal.fire('❌', 'Error: ' + error.message, 'error');
             }
         };
 
@@ -1131,14 +1142,13 @@
             try {
                 showLoading('Menghapus...');
 
-                const response = await fetch(`${API_URL}/post/${postId}`, {
+                const data = await safeFetch(`${API_URL}/post/${postId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-                const data = await response.json();
                 hideLoading();
 
                 if (data.success) {
@@ -1168,16 +1178,21 @@
             const savedToken = localStorage.getItem('token');
 
             if (savedUser && savedToken) {
-                currentUser = JSON.parse(savedUser);
-                token = savedToken;
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    token = savedToken;
 
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayUsername').textContent = currentUser.username;
-                
-                loadPosts('all');
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('displayUsername').textContent = currentUser.username;
+                    
+                    loadPosts('all');
+                } catch (e) {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('token');
+                    checkConnection();
+                }
             } else {
-                // Cek koneksi database
                 checkConnection();
             }
         }
