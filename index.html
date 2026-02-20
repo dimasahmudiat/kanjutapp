@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp with Chat</title>
+    <title>GalleryApp - Public Chat</title>
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -269,123 +269,29 @@
             border-radius: 10px;
             display: none;
         }
-        /* Chat UI */
+        /* Public Chat */
         .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             display: flex;
-            gap: 20px;
+            flex-direction: column;
             height: 70vh;
-        }
-        .chat-sidebar {
-            width: 300px;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-sidebar-header {
-            padding: 15px;
-            background: #667eea;
-            color: white;
-        }
-        .chat-sidebar-header h3 { font-size: 18px; }
-        .chat-search {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .chat-search input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-        }
-        .chat-conversations {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 5px;
-        }
-        .conversation-item:hover { background: #f0f0f0; }
-        .conversation-item.active { background: #e3f2fd; }
-        .conversation-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #667eea;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .conversation-info {
-            flex: 1;
-            overflow: hidden;
-        }
-        .conversation-name {
-            font-weight: 600;
-        }
-        .conversation-last {
-            font-size: 12px;
-            color: #999;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .conversation-time {
-            font-size: 10px;
-            color: #999;
-        }
-        .unread-badge {
-            background: #e74c3c;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-        .chat-main {
-            flex: 1;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .chat-header {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
         .message {
             max-width: 70%;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 15px;
             word-wrap: break-word;
+            position: relative;
         }
         .message.sent {
             align-self: flex-end;
@@ -398,66 +304,106 @@
             background: #f0f0f0;
             border-bottom-left-radius: 0;
         }
-        .message-info {
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .message-author {
+            font-weight: 600;
+        }
+        .message-time {
+            font-size: 10px;
+        }
+        .message-content {
+            line-height: 1.4;
+        }
+        .message-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+        .reply-btn {
+            background: none;
+            border: none;
+            color: inherit;
             font-size: 11px;
-            margin-top: 4px;
+            cursor: pointer;
             opacity: 0.7;
         }
+        .reply-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
         .chat-input-area {
-            padding: 15px;
-            border-top: 1px solid #eee;
             display: flex;
             gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #eee;
         }
         .chat-input-area input {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 20px;
+            border-radius: 25px;
+            font-size: 14px;
         }
         .chat-input-area button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: 600;
         }
-        .user-search-results {
-            position: absolute;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            width: 250px;
-            z-index: 100;
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 18px;
+            grid-column: 1/-1;
         }
-        .user-search-item {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-        .user-search-item:hover { background: #f0f0f0; }
-        .empty-state { text-align: center; padding: 50px; color: #999; }
         .loading-overlay {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
         .loading-content {
-            background: white; padding: 30px; border-radius: 15px; text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
         }
         .spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%;
-            width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         @media (max-width: 768px) {
             .navbar { padding: 15px; }
             .nav-menu { width: 100%; justify-content: center; margin: 10px 0; }
             .content { padding: 20px; }
             .gallery-grid { grid-template-columns: 1fr; }
-            .chat-container { flex-direction: column; height: auto; }
-            .chat-sidebar { width: 100%; }
+            .message { max-width: 90%; }
         }
     </style>
 </head>
@@ -517,7 +463,7 @@
                     <div class="nav-item active" id="homeNav">🏠 Beranda</div>
                     <div class="nav-item" id="uploadNav">📤 Upload</div>
                     <div class="nav-item" id="myPhotosNav">🖼️ Fotoku</div>
-                    <div class="nav-item" id="chatNav">💬 Chat</div>
+                    <div class="nav-item" id="chatNav">💬 Chat Publik</div>
                 </div>
                 <div class="user-section">
                     <span class="username-badge" id="displayUsername"></span>
@@ -550,32 +496,15 @@
                     </div>
                 </div>
 
-                <!-- Chat Page -->
+                <!-- Public Chat Page -->
                 <div id="chatPage" style="display: none;">
                     <div class="chat-container">
-                        <!-- Sidebar percakapan -->
-                        <div class="chat-sidebar">
-                            <div class="chat-sidebar-header">
-                                <h3>Percakapan</h3>
-                            </div>
-                            <div class="chat-search">
-                                <input type="text" id="chatSearchInput" placeholder="Cari user...">
-                                <div id="userSearchResults" class="user-search-results" style="display:none;"></div>
-                            </div>
-                            <div class="chat-conversations" id="conversationsList">
-                                <div class="empty-state">Loading...</div>
-                            </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="empty-state">Loading pesan...</div>
                         </div>
-                        <!-- Area chat utama -->
-                        <div class="chat-main">
-                            <div class="chat-header" id="chatHeader">
-                                <span>Pilih percakapan</span>
-                            </div>
-                            <div class="chat-messages" id="chatMessages"></div>
-                            <div class="chat-input-area" id="chatInputArea" style="display:none;">
-                                <input type="text" id="messageInput" placeholder="Tulis pesan...">
-                                <button id="sendMessageBtn">Kirim</button>
-                            </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="messageInput" placeholder="Tulis pesan...">
+                            <button id="sendMessageBtn">Kirim</button>
                         </div>
                     </div>
                 </div>
@@ -587,8 +516,6 @@
         const API_URL = '/api'; // untuk production, ganti dengan 'http://localhost:3000/api' jika local
         let currentUser = null;
         let token = localStorage.getItem('token');
-        let currentChatUserId = null;
-        let conversations = [];
         let messagesRefreshInterval = null;
 
         function showLoading(m) { document.getElementById('loadingMessage').textContent = m; document.getElementById('loadingOverlay').style.display = 'flex'; }
@@ -623,7 +550,7 @@
             document.getElementById('uploadPage').style.display = 'none';
             document.getElementById('chatPage').style.display = 'none';
             loadPosts('all');
-            clearMessagesRefresh();
+            stopChatRefresh();
         });
 
         document.getElementById('myPhotosNav').addEventListener('click', () => {
@@ -633,7 +560,7 @@
             document.getElementById('uploadPage').style.display = 'none';
             document.getElementById('chatPage').style.display = 'none';
             if (currentUser) loadPosts('my');
-            clearMessagesRefresh();
+            stopChatRefresh();
         });
 
         document.getElementById('uploadNav').addEventListener('click', () => {
@@ -645,7 +572,7 @@
             document.getElementById('fileInput').value = '';
             document.getElementById('caption').value = '';
             document.getElementById('preview').style.display = 'none';
-            clearMessagesRefresh();
+            stopChatRefresh();
         });
 
         document.getElementById('chatNav').addEventListener('click', () => {
@@ -654,25 +581,20 @@
             document.getElementById('myPhotosPage').style.display = 'none';
             document.getElementById('uploadPage').style.display = 'none';
             document.getElementById('chatPage').style.display = 'block';
-            loadConversations();
-            startMessagesRefresh();
+            loadPublicMessages();
+            startChatRefresh();
         });
 
-        function clearMessagesRefresh() {
+        function startChatRefresh() {
+            stopChatRefresh();
+            messagesRefreshInterval = setInterval(loadPublicMessages, 3000);
+        }
+
+        function stopChatRefresh() {
             if (messagesRefreshInterval) {
                 clearInterval(messagesRefreshInterval);
                 messagesRefreshInterval = null;
             }
-        }
-
-        function startMessagesRefresh() {
-            clearMessagesRefresh();
-            messagesRefreshInterval = setInterval(() => {
-                if (currentChatUserId) {
-                    loadMessages(currentChatUserId, false);
-                }
-                loadConversations(false);
-            }, 3000);
         }
 
         // ========== LOGIN / REGISTER / LOGOUT ==========
@@ -710,9 +632,9 @@
             } catch(e) { hideLoading(); Swal.fire('❌', e.message, 'error'); }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', ()=>{ currentUser=null; token=null; localStorage.clear(); document.getElementById('authContainer').style.display='flex'; document.getElementById('mainApp').style.display='none'; clearMessagesRefresh(); Swal.fire('👋','Logout','info'); });
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{ currentUser=null; token=null; localStorage.clear(); document.getElementById('authContainer').style.display='flex'; document.getElementById('mainApp').style.display='none'; stopChatRefresh(); Swal.fire('👋','Logout','info'); });
 
-        // ========== GALLERY FUNCTIONS (sama seperti sebelumnya) ==========
+        // ========== GALLERY FUNCTIONS ==========
         document.getElementById('fileUploadArea').addEventListener('click', ()=> document.getElementById('fileInput').click());
         document.getElementById('fileInput').addEventListener('change', e=>{ const f=e.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>{ document.getElementById('preview').src=e.target.result; document.getElementById('preview').style.display='block'; }; r.readAsDataURL(f); } });
 
@@ -764,71 +686,14 @@
             } catch(e){ hideLoading(); Swal.fire('❌',e.message,'error'); }
         };
 
-        // ========== CHAT FUNCTIONS ==========
-        async function loadConversations(showLoad = true) {
+        // ========== PUBLIC CHAT FUNCTIONS ==========
+        async function loadPublicMessages() {
             if (!currentUser) return;
             try {
-                if (showLoad) showLoading('Memuat percakapan...');
-                const d = await safeFetch(`${API_URL}/messages/conversations`, { headers:{'Authorization':`Bearer ${token}`} });
-                if (showLoad) hideLoading();
-                conversations = d.conversations || [];
-                renderConversations();
-            } catch (e) {
-                if (showLoad) hideLoading();
-                console.error(e);
-            }
-        }
-
-        function renderConversations() {
-            const list = document.getElementById('conversationsList');
-            if (!conversations.length) {
-                list.innerHTML = '<div class="empty-state">Belum ada percakapan</div>';
-                return;
-            }
-            let html = '';
-            conversations.forEach(c => {
-                const activeClass = currentChatUserId == c.user_id ? 'active' : '';
-                const unread = c.unread_count > 0 ? `<span class="unread-badge">${c.unread_count}</span>` : '';
-                const lastTime = c.last_time ? new Date(c.last_time).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
-                html += `
-                    <div class="conversation-item ${activeClass}" onclick="selectConversation(${c.user_id}, '${c.username}')">
-                        <div class="conversation-avatar">${c.username.charAt(0).toUpperCase()}</div>
-                        <div class="conversation-info">
-                            <div class="conversation-name">${c.username}</div>
-                            <div class="conversation-last">${c.last_message || ''}</div>
-                        </div>
-                        <div class="conversation-time">${lastTime}</div>
-                        ${unread}
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
-
-        window.selectConversation = async (userId, username) => {
-            currentChatUserId = userId;
-            document.getElementById('chatHeader').innerHTML = `<strong>${username}</strong>`;
-            document.getElementById('chatInputArea').style.display = 'flex';
-            await loadMessages(userId, true);
-            // highlight percakapan
-            renderConversations();
-        };
-
-        async function loadMessages(userId, showLoad = true) {
-            if (!userId) return;
-            try {
-                if (showLoad) showLoading('Memuat pesan...');
-                const d = await safeFetch(`${API_URL}/messages/with/${userId}`, { headers:{'Authorization':`Bearer ${token}`} });
-                if (showLoad) hideLoading();
+                const d = await safeFetch(`${API_URL}/public-messages`);
                 renderMessages(d.messages || []);
-                // scroll ke bawah
-                setTimeout(() => {
-                    const msgDiv = document.getElementById('chatMessages');
-                    msgDiv.scrollTop = msgDiv.scrollHeight;
-                }, 100);
             } catch (e) {
-                if (showLoad) hideLoading();
-                console.error(e);
+                console.error('Gagal load pesan:', e);
             }
         }
 
@@ -840,74 +705,70 @@
             }
             let html = '';
             messages.forEach(m => {
-                const isSent = m.sender_id === currentUser.id;
-                const time = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                const isSent = m.user_id === currentUser?.id;
+                const time = new Date(m.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
                 html += `
                     <div class="message ${isSent ? 'sent' : 'received'}">
-                        <div>${m.message}</div>
-                        <div class="message-info">${time}</div>
+                        <div class="message-header">
+                            <span class="message-author">${m.username}</span>
+                            <span class="message-time">${time}</span>
+                        </div>
+                        <div class="message-content">${escapeHtml(m.message)}</div>
+                        <div class="message-footer">
+                            <button class="reply-btn" onclick="setReply('${m.username}')">Balas</button>
+                        </div>
                     </div>
                 `;
             });
             container.innerHTML = html;
+            // scroll ke bawah
+            container.scrollTop = container.scrollHeight;
         }
+
+        // escape HTML sederhana
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                if(m === '"') return '&quot;';
+                if(m === "'") return '&#039;';
+                return m;
+            });
+        }
+
+        window.setReply = (username) => {
+            const input = document.getElementById('messageInput');
+            input.value = `@${username} `;
+            input.focus();
+        };
 
         document.getElementById('sendMessageBtn').addEventListener('click', async () => {
             const input = document.getElementById('messageInput');
             const msg = input.value.trim();
-            if (!msg || !currentChatUserId) return;
+            if (!msg) return;
             input.value = '';
             try {
-                const d = await safeFetch(`${API_URL}/messages/send`, {
+                const d = await safeFetch(`${API_URL}/public-messages`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ receiver_id: currentChatUserId, message: msg })
+                    body: JSON.stringify({ message: msg })
                 });
                 if (d.success) {
-                    // refresh pesan
-                    loadMessages(currentChatUserId, false);
-                    // update percakapan
-                    loadConversations(false);
+                    // langsung refresh pesan
+                    await loadPublicMessages();
                 }
             } catch (e) {
                 Swal.fire('❌', e.message, 'error');
             }
         });
 
-        // Pencarian user
-        let searchTimeout;
-        document.getElementById('chatSearchInput').addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            const q = e.target.value.trim();
-            if (q.length < 2) {
-                document.getElementById('userSearchResults').style.display = 'none';
-                return;
+        // Kirim dengan Enter
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('sendMessageBtn').click();
             }
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const d = await safeFetch(`${API_URL}/users/search?q=${encodeURIComponent(q)}`, { headers:{'Authorization':`Bearer ${token}`} });
-                    const resultsDiv = document.getElementById('userSearchResults');
-                    if (d.users && d.users.length) {
-                        let html = '';
-                        d.users.forEach(u => {
-                            html += `<div class="user-search-item" onclick="startChatWith(${u.id}, '${u.username}')">${u.username}</div>`;
-                        });
-                        resultsDiv.innerHTML = html;
-                        resultsDiv.style.display = 'block';
-                    } else {
-                        resultsDiv.style.display = 'none';
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-            }, 500);
         });
-
-        window.startChatWith = (userId, username) => {
-            document.getElementById('chatSearchInput').value = '';
-            document.getElementById('userSearchResults').style.display = 'none';
-            selectConversation(userId, username);
-        };
 
         // ========== SESSION CHECK ==========
         (async ()=>{
