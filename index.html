@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - MySQL</title>
+    <title>GalleryApp with Chat</title>
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -58,9 +58,6 @@
             border-radius: 8px;
             font-size: 14px;
         }
-        .info-box strong {
-            color: #1976d2;
-        }
         .input-group {
             margin-bottom: 20px;
         }
@@ -70,7 +67,7 @@
             color: #555;
             font-weight: 500;
         }
-        .input-group input {
+        .input-group input, .input-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e1e1e1;
@@ -78,7 +75,7 @@
             font-size: 16px;
             transition: all 0.3s;
         }
-        .input-group input:focus {
+        .input-group input:focus, .input-group textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -100,12 +97,9 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        .btn-success {
-            background: #27ae60;
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-        }
+        .btn-success { background: #27ae60; }
+        .btn-secondary { background: #95a5a6; }
+        .btn-info { background: #3498db; }
         .auth-link {
             text-align: center;
             margin-top: 20px;
@@ -176,9 +170,6 @@
             cursor: pointer;
             font-weight: 500;
         }
-        .logout-btn:hover {
-            background: #c0392b;
-        }
         .content {
             padding: 30px;
         }
@@ -192,6 +183,7 @@
             padding-bottom: 10px;
             display: inline-block;
         }
+        /* Gallery Grid */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -203,11 +195,6 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-        .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
         .photo-image {
             width: 100%;
@@ -220,38 +207,24 @@
         .photo-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 10px;
         }
         .photo-author {
             font-weight: 600;
             color: #667eea;
-            background: #f0f0f0;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 14px;
-        }
-        .photo-date {
-            color: #999;
-            font-size: 12px;
         }
         .photo-caption {
             color: #666;
-            line-height: 1.6;
-            margin: 15px 0;
-            font-size: 15px;
+            margin: 10px 0;
         }
         .photo-stats {
-            display: flex;
-            gap: 15px;
             color: #999;
             font-size: 14px;
-            margin: 10px 0;
         }
         .photo-actions {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .like-btn, .delete-btn {
             padding: 8px;
@@ -261,18 +234,10 @@
             font-size: 14px;
             flex: 1;
         }
-        .like-btn {
-            background: #f0f0f0;
-            color: #333;
-        }
-        .like-btn.liked {
-            background: #ff6b6b;
-            color: white;
-        }
-        .delete-btn {
-            background: #e74c3c;
-            color: white;
-        }
+        .like-btn { background: #f0f0f0; }
+        .like-btn.liked { background: #ff6b6b; color: white; }
+        .delete-btn { background: #e74c3c; color: white; }
+        /* Upload Form */
         .upload-section {
             background: white;
             padding: 30px;
@@ -294,20 +259,9 @@
             text-align: center;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
             margin-bottom: 20px;
         }
-        .file-upload:hover {
-            background: #f8f9ff;
-            border-color: #764ba2;
-        }
-        .file-upload p {
-            color: #667eea;
-            font-size: 18px;
-        }
-        .file-upload input {
-            display: none;
-        }
+        .file-upload input { display: none; }
         .image-preview {
             max-width: 100%;
             max-height: 300px;
@@ -315,85 +269,195 @@
             border-radius: 10px;
             display: none;
         }
-        .image-preview.show {
-            display: block;
+        /* Chat UI */
+        .chat-container {
+            display: flex;
+            gap: 20px;
+            height: 70vh;
         }
-        textarea {
+        .chat-sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-sidebar-header {
+            padding: 15px;
+            background: #667eea;
+            color: white;
+        }
+        .chat-sidebar-header h3 { font-size: 18px; }
+        .chat-search {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .chat-search input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 10px;
-            font-size: 16px;
-            min-height: 100px;
-            resize: vertical;
-            margin-bottom: 20px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
         }
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
+        .chat-conversations {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
         }
-        .empty-state {
-            text-align: center;
-            padding: 50px;
-            color: #999;
-            font-size: 18px;
-            grid-column: 1/-1;
-        }
-        .empty-state i {
-            font-size: 80px;
-            color: #ddd;
-            margin-bottom: 20px;
-            display: block;
-        }
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
+        .conversation-item {
+            display: flex;
             align-items: center;
-            z-index: 9999;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 5px;
+        }
+        .conversation-item:hover { background: #f0f0f0; }
+        .conversation-item.active { background: #e3f2fd; }
+        .conversation-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .conversation-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .conversation-name {
+            font-weight: 600;
+        }
+        .conversation-last {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .conversation-time {
+            font-size: 10px;
+            color: #999;
+        }
+        .unread-badge {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .chat-main {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .message.received {
+            align-self: flex-start;
+            background: #f0f0f0;
+            border-bottom-left-radius: 0;
+        }
+        .message-info {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+        }
+        .chat-input-area button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .user-search-results {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 250px;
+            z-index: 100;
+        }
+        .user-search-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .user-search-item:hover { background: #f0f0f0; }
+        .empty-state { text-align: center; padding: 50px; color: #999; }
+        .loading-overlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;
         }
         .loading-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
+            background: white; padding: 30px; border-radius: 15px; text-align: center;
         }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%;
+            width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px;
-            }
-            .nav-menu {
-                width: 100%;
-                justify-content: center;
-                margin: 10px 0;
-            }
-            .content {
-                padding: 20px;
-            }
-            .gallery-grid {
-                grid-template-columns: 1fr;
-            }
-            .photo-actions {
-                flex-direction: column;
-            }
+            .navbar { padding: 15px; }
+            .nav-menu { width: 100%; justify-content: center; margin: 10px 0; }
+            .content { padding: 20px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .chat-container { flex-direction: column; height: auto; }
+            .chat-sidebar { width: 100%; }
         }
     </style>
 </head>
@@ -420,40 +484,27 @@
                 </div>
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="loginUsername" placeholder="Masukkan username" value="123">
+                    <input type="text" id="loginUsername" value="123">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Masukkan password" value="123">
+                    <input type="password" id="loginPassword" value="123">
                 </div>
                 <button class="btn" id="loginBtn">Login</button>
-                <button class="btn btn-success" id="testLoginBtn">🔑 Login Test (123/123)</button>
+                <button class="btn btn-success" id="testLoginBtn">🔑 Login Test</button>
                 <div class="auth-link">
-                    Belum punya akun? <a href="#" id="showRegisterBtn">Daftar disini</a>
+                    Belum punya akun? <a href="#" id="showRegisterBtn">Daftar</a>
                 </div>
             </div>
-
             <!-- Register Card -->
             <div id="registerCard" class="auth-card" style="display: none;">
-                <h2>📝 Daftar Akun Baru</h2>
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="regUsername" placeholder="Pilih username">
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="regEmail" placeholder="Masukkan email">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="regPassword" placeholder="Buat password">
-                </div>
-                <div class="input-group">
-                    <label>Konfirmasi Password</label>
-                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi password">
-                </div>
+                <h2>📝 Daftar</h2>
+                <div class="input-group"><label>Username</label><input type="text" id="regUsername"></div>
+                <div class="input-group"><label>Email</label><input type="email" id="regEmail"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="regPassword"></div>
+                <div class="input-group"><label>Konfirmasi</label><input type="password" id="regConfirmPassword"></div>
                 <button class="btn" id="registerBtn">Daftar</button>
-                <button class="btn btn-secondary" id="backToLoginBtn">Kembali ke Login</button>
+                <button class="btn btn-secondary" id="backToLoginBtn">Kembali</button>
             </div>
         </div>
 
@@ -466,6 +517,7 @@
                     <div class="nav-item active" id="homeNav">🏠 Beranda</div>
                     <div class="nav-item" id="uploadNav">📤 Upload</div>
                     <div class="nav-item" id="myPhotosNav">🖼️ Fotoku</div>
+                    <div class="nav-item" id="chatNav">💬 Chat</div>
                 </div>
                 <div class="user-section">
                     <span class="username-badge" id="displayUsername"></span>
@@ -477,35 +529,54 @@
             <div class="content">
                 <!-- Home Page -->
                 <div id="homePage">
-                    <div class="page-header">
-                        <h2>📸 Semua Foto</h2>
-                    </div>
-                    <div id="galleryContainer" class="gallery-grid">
-                        <div class="empty-state">Loading...</div>
-                    </div>
+                    <div class="page-header"><h2>📸 Semua Foto</h2></div>
+                    <div id="galleryContainer" class="gallery-grid"><div class="empty-state">Loading...</div></div>
                 </div>
 
                 <!-- My Photos Page -->
                 <div id="myPhotosPage" style="display: none;">
-                    <div class="page-header">
-                        <h2>🖼️ Fotoku</h2>
-                    </div>
-                    <div id="myPhotosContainer" class="gallery-grid">
-                        <div class="empty-state">Loading...</div>
-                    </div>
+                    <div class="page-header"><h2>🖼️ Fotoku</h2></div>
+                    <div id="myPhotosContainer" class="gallery-grid"><div class="empty-state">Loading...</div></div>
                 </div>
 
                 <!-- Upload Page -->
                 <div id="uploadPage" style="display: none;">
                     <div class="upload-section">
-                        <h3>📤 Upload Foto Baru</h3>
-                        <div class="file-upload" id="fileUploadArea">
-                            <p>Klik untuk pilih foto</p>
-                            <input type="file" id="fileInput" accept="image/*">
+                        <h3>📤 Upload Foto</h3>
+                        <div class="file-upload" id="fileUploadArea"><p>Klik pilih foto</p><input type="file" id="fileInput" accept="image/*"></div>
+                        <img id="preview" class="image-preview">
+                        <textarea id="caption" placeholder="Tulis caption..."></textarea>
+                        <button class="btn" id="uploadBtn">Upload</button>
+                    </div>
+                </div>
+
+                <!-- Chat Page -->
+                <div id="chatPage" style="display: none;">
+                    <div class="chat-container">
+                        <!-- Sidebar percakapan -->
+                        <div class="chat-sidebar">
+                            <div class="chat-sidebar-header">
+                                <h3>Percakapan</h3>
+                            </div>
+                            <div class="chat-search">
+                                <input type="text" id="chatSearchInput" placeholder="Cari user...">
+                                <div id="userSearchResults" class="user-search-results" style="display:none;"></div>
+                            </div>
+                            <div class="chat-conversations" id="conversationsList">
+                                <div class="empty-state">Loading...</div>
+                            </div>
                         </div>
-                        <img id="preview" class="image-preview" alt="Preview">
-                        <textarea id="caption" placeholder="Tulis caption untuk foto ini..."></textarea>
-                        <button class="btn" id="uploadBtn">Upload Foto</button>
+                        <!-- Area chat utama -->
+                        <div class="chat-main">
+                            <div class="chat-header" id="chatHeader">
+                                <span>Pilih percakapan</span>
+                            </div>
+                            <div class="chat-messages" id="chatMessages"></div>
+                            <div class="chat-input-area" id="chatInputArea" style="display:none;">
+                                <input type="text" id="messageInput" placeholder="Tulis pesan...">
+                                <button id="sendMessageBtn">Kirim</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -513,484 +584,339 @@
     </div>
 
     <script>
-        // ================== KONFIGURASI API ==================
-        // Untuk production (backend di Vercel), gunakan relative URL
-        const API_URL = '/api';  // Akan mengarah ke backend yang sama
-        // Untuk local development, ganti dengan 'http://localhost:3000/api'
-
+        const API_URL = '/api'; // untuk production, ganti dengan 'http://localhost:3000/api' jika local
         let currentUser = null;
         let token = localStorage.getItem('token');
+        let currentChatUserId = null;
+        let conversations = [];
+        let messagesRefreshInterval = null;
 
-        // ================== HELPER FUNCTIONS ==================
-        function showLoading(message = 'Loading...') {
-            document.getElementById('loadingMessage').textContent = message;
-            document.getElementById('loadingOverlay').style.display = 'flex';
+        function showLoading(m) { document.getElementById('loadingMessage').textContent = m; document.getElementById('loadingOverlay').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+        async function safeFetch(url, opt = {}) {
+            const res = await fetch(url, opt);
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).substring(0,100)}`);
+            const ct = res.headers.get('content-type');
+            if (ct && ct.includes('application/json')) return await res.json();
+            throw new Error('Bukan JSON');
         }
 
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        async function safeFetch(url, options = {}) {
-            try {
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
-                }
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return await response.json();
-                } else {
-                    const text = await response.text();
-                    throw new Error('Response bukan JSON: ' + text.substring(0, 100));
-                }
-            } catch (error) {
-                console.error('Fetch error:', error);
-                throw error;
-            }
-        }
-
-        // ================== CEK KONEKSI ==================
         async function checkConnection() {
-            try {
-                showLoading('Mengecek koneksi database...');
-                const data = await safeFetch(`${API_URL}/test`);
-                hideLoading();
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Koneksi Database Berhasil!',
-                        text: 'Terhubung ke MySQL',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ Koneksi Gagal',
-                        text: data.message || 'Unknown error'
-                    });
-                }
-            } catch (error) {
-                hideLoading();
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Tidak Dapat Terhubung ke Server',
-                    text: error.message,
-                    footer: 'Pastikan backend sudah berjalan di ' + API_URL
-                });
-            }
+            try { showLoading('Cek koneksi...'); const d = await safeFetch(`${API_URL}/test`); hideLoading(); Swal.fire('✅', 'Koneksi OK', 'success'); }
+            catch (e) { hideLoading(); Swal.fire('❌', e.message, 'error'); }
         }
 
-        // ================== AUTH FUNCTIONS ==================
-        document.getElementById('showRegisterBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('loginCard').style.display = 'none';
-            document.getElementById('registerCard').style.display = 'block';
-        });
-
-        document.getElementById('backToLoginBtn').addEventListener('click', function() {
-            document.getElementById('loginCard').style.display = 'block';
-            document.getElementById('registerCard').style.display = 'none';
-        });
-
-        // Login
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                Swal.fire('⚠️', 'Username dan password harus diisi!', 'warning');
-                return;
-            }
-
-            try {
-                showLoading('Login...');
-                const data = await safeFetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                hideLoading();
-
-                if (data.success) {
-                    currentUser = data.user;
-                    token = data.token;
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    document.getElementById('displayUsername').textContent = data.user.username;
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Login Berhasil!',
-                        text: `Selamat datang, ${data.user.username}!`,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    loadPosts('all');
-                } else {
-                    Swal.fire('❌', data.message, 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                Swal.fire('❌', 'Error: ' + error.message, 'error');
-            }
-        });
-
-        // Test Login
-        document.getElementById('testLoginBtn').addEventListener('click', function() {
-            document.getElementById('loginUsername').value = '123';
-            document.getElementById('loginPassword').value = '123';
-            document.getElementById('loginBtn').click();
-        });
-
-        // Register
-        document.getElementById('registerBtn').addEventListener('click', async function() {
-            const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirmPassword').value;
-
-            if (!username || !email || !password || !confirm) {
-                Swal.fire('⚠️', 'Semua field harus diisi!', 'warning');
-                return;
-            }
-
-            if (password !== confirm) {
-                Swal.fire('❌', 'Password tidak cocok!', 'error');
-                return;
-            }
-
-            try {
-                showLoading('Mendaftar...');
-                const data = await safeFetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
-                hideLoading();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Registrasi Berhasil!',
-                        text: 'Silakan login',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-
-                    setTimeout(() => {
-                        document.getElementById('loginCard').style.display = 'block';
-                        document.getElementById('registerCard').style.display = 'none';
-                    }, 2000);
-                } else {
-                    Swal.fire('❌', data.message, 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                Swal.fire('❌', 'Error: ' + error.message, 'error');
-            }
-        });
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            currentUser = null;
-            token = null;
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-
-            document.getElementById('authContainer').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-
-            Swal.fire('👋', 'Sampai jumpa lagi!', 'info');
-        });
-
-        // ================== NAVIGATION ==================
+        // Navigasi
         function setActiveNav(page) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if (page === 'home') document.getElementById('homeNav').classList.add('active');
-            else if (page === 'myphotos') document.getElementById('myPhotosNav').classList.add('active');
+            else if (page === 'my') document.getElementById('myPhotosNav').classList.add('active');
             else if (page === 'upload') document.getElementById('uploadNav').classList.add('active');
+            else if (page === 'chat') document.getElementById('chatNav').classList.add('active');
         }
 
-        document.getElementById('homeNav').addEventListener('click', function() {
+        document.getElementById('homeNav').addEventListener('click', () => {
             setActiveNav('home');
             document.getElementById('homePage').style.display = 'block';
             document.getElementById('myPhotosPage').style.display = 'none';
             document.getElementById('uploadPage').style.display = 'none';
+            document.getElementById('chatPage').style.display = 'none';
             loadPosts('all');
+            clearMessagesRefresh();
         });
 
-        document.getElementById('myPhotosNav').addEventListener('click', function() {
-            setActiveNav('myphotos');
+        document.getElementById('myPhotosNav').addEventListener('click', () => {
+            setActiveNav('my');
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('myPhotosPage').style.display = 'block';
             document.getElementById('uploadPage').style.display = 'none';
+            document.getElementById('chatPage').style.display = 'none';
             if (currentUser) loadPosts('my');
+            clearMessagesRefresh();
         });
 
-        document.getElementById('uploadNav').addEventListener('click', function() {
+        document.getElementById('uploadNav').addEventListener('click', () => {
             setActiveNav('upload');
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('myPhotosPage').style.display = 'none';
             document.getElementById('uploadPage').style.display = 'block';
-
-            // Reset form
+            document.getElementById('chatPage').style.display = 'none';
             document.getElementById('fileInput').value = '';
             document.getElementById('caption').value = '';
             document.getElementById('preview').style.display = 'none';
+            clearMessagesRefresh();
         });
 
-        // ================== UPLOAD ==================
-        document.getElementById('fileUploadArea').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
+        document.getElementById('chatNav').addEventListener('click', () => {
+            setActiveNav('chat');
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('myPhotosPage').style.display = 'none';
+            document.getElementById('uploadPage').style.display = 'none';
+            document.getElementById('chatPage').style.display = 'block';
+            loadConversations();
+            startMessagesRefresh();
         });
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('preview').src = e.target.result;
-                    document.getElementById('preview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+        function clearMessagesRefresh() {
+            if (messagesRefreshInterval) {
+                clearInterval(messagesRefreshInterval);
+                messagesRefreshInterval = null;
             }
-        });
+        }
 
-        document.getElementById('uploadBtn').addEventListener('click', async function() {
-            const file = document.getElementById('fileInput').files[0];
-            const caption = document.getElementById('caption').value.trim();
+        function startMessagesRefresh() {
+            clearMessagesRefresh();
+            messagesRefreshInterval = setInterval(() => {
+                if (currentChatUserId) {
+                    loadMessages(currentChatUserId, false);
+                }
+                loadConversations(false);
+            }, 3000);
+        }
 
-            if (!file) {
-                Swal.fire('⚠️', 'Pilih foto dulu!', 'warning');
-                return;
-            }
+        // ========== LOGIN / REGISTER / LOGOUT ==========
+        document.getElementById('showRegisterBtn').addEventListener('click', e => { e.preventDefault(); document.getElementById('loginCard').style.display = 'none'; document.getElementById('registerCard').style.display = 'block'; });
+        document.getElementById('backToLoginBtn').addEventListener('click', () => { document.getElementById('loginCard').style.display = 'block'; document.getElementById('registerCard').style.display = 'none'; });
 
-            if (!caption) {
-                Swal.fire('⚠️', 'Tulis caption!', 'warning');
-                return;
-            }
-
-            if (!token) {
-                Swal.fire('❌', 'Anda belum login!', 'error');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('caption', caption);
-
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const u = document.getElementById('loginUsername').value.trim(), p = document.getElementById('loginPassword').value;
+            if (!u || !p) return Swal.fire('⚠️', 'Isi username & password', 'warning');
             try {
-                showLoading('Uploading...');
-                const response = await fetch(`${API_URL}/upload`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
+                showLoading('Login...');
+                const d = await safeFetch(`${API_URL}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u,password:p}) });
+                hideLoading();
+                if (d.success) {
+                    currentUser = d.user; token = d.token; localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(d.user));
+                    document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('displayUsername').textContent = d.user.username; Swal.fire('✅', `Welcome ${d.user.username}`, 'success');
+                    loadPosts('all');
+                } else Swal.fire('❌', d.message, 'error');
+            } catch (e) { hideLoading(); Swal.fire('❌', e.message, 'error'); }
+        });
+
+        document.getElementById('testLoginBtn').addEventListener('click', ()=>{ document.getElementById('loginUsername').value='123'; document.getElementById('loginPassword').value='123'; document.getElementById('loginBtn').click(); });
+
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const u = document.getElementById('regUsername').value.trim(), e = document.getElementById('regEmail').value.trim(), p = document.getElementById('regPassword').value, c = document.getElementById('regConfirmPassword').value;
+            if (!u||!e||!p||!c) return Swal.fire('⚠️', 'Isi semua', 'warning');
+            if (p!==c) return Swal.fire('❌', 'Password tidak cocok', 'error');
+            try {
+                showLoading('Registrasi...');
+                const d = await safeFetch(`${API_URL}/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u,email:e,password:p}) });
+                hideLoading();
+                if (d.success) { Swal.fire('✅', 'Registrasi berhasil, silakan login', 'success'); setTimeout(()=>{ document.getElementById('loginCard').style.display='block'; document.getElementById('registerCard').style.display='none'; },1500); }
+                else Swal.fire('❌', d.message, 'error');
+            } catch(e) { hideLoading(); Swal.fire('❌', e.message, 'error'); }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{ currentUser=null; token=null; localStorage.clear(); document.getElementById('authContainer').style.display='flex'; document.getElementById('mainApp').style.display='none'; clearMessagesRefresh(); Swal.fire('👋','Logout','info'); });
+
+        // ========== GALLERY FUNCTIONS (sama seperti sebelumnya) ==========
+        document.getElementById('fileUploadArea').addEventListener('click', ()=> document.getElementById('fileInput').click());
+        document.getElementById('fileInput').addEventListener('change', e=>{ const f=e.target.files[0]; if(f){ const r=new FileReader(); r.onload=e=>{ document.getElementById('preview').src=e.target.result; document.getElementById('preview').style.display='block'; }; r.readAsDataURL(f); } });
+
+        document.getElementById('uploadBtn').addEventListener('click', async ()=>{
+            const file = document.getElementById('fileInput').files[0], caption = document.getElementById('caption').value.trim();
+            if(!file||!caption) return Swal.fire('⚠️','Pilih foto & tulis caption','warning');
+            if(!token) return Swal.fire('❌','Login dulu','error');
+            const fd = new FormData(); fd.append('image',file); fd.append('caption',caption);
+            try {
+                showLoading('Upload...');
+                const res = await fetch(`${API_URL}/upload`, { method:'POST', headers:{'Authorization':`Bearer ${token}`}, body:fd });
+                if(!res.ok) throw new Error(await res.text());
+                const d = await res.json(); hideLoading();
+                if(d.success){ Swal.fire('✅','Upload berhasil','success'); document.getElementById('fileInput').value=''; document.getElementById('caption').value=''; document.getElementById('preview').style.display='none'; setTimeout(()=>document.getElementById('homeNav').click(),1500); }
+                else Swal.fire('❌',d.message,'error');
+            } catch(e){ hideLoading(); Swal.fire('❌',e.message,'error'); }
+        });
+
+        async function loadPosts(t='all') {
+            try {
+                showLoading('Load posts...');
+                const url = t==='all' ? `${API_URL}/posts` : `${API_URL}/posts/user/${currentUser.id}`;
+                const d = await safeFetch(url); hideLoading();
+                const cont = t==='all' ? document.getElementById('galleryContainer') : document.getElementById('myPhotosContainer');
+                if(!d.posts||d.posts.length===0){ cont.innerHTML='<div class="empty-state">📷 Belum ada foto</div>'; return; }
+                let html='';
+                d.posts.forEach(p=>{
+                    html+=`<div class="photo-card"><img src="${p.image_url}" class="photo-image"><div class="photo-details"><div class="photo-header"><span class="photo-author">👤 ${p.username}</span><span>${new Date(p.created_at).toLocaleDateString()}</span></div><p class="photo-caption">${p.caption}</p><div class="photo-stats">❤️ ${p.likes_count||0} likes</div>${currentUser?`<div class="photo-actions"><button class="like-btn" onclick="toggleLike(${p.id})">🤍 Like</button>${p.user_id===currentUser.id?`<button class="delete-btn" onclick="deletePost(${p.id})">🗑️ Hapus</button>`:''}</div>`:''}</div></div>`;
                 });
+                cont.innerHTML = html;
+            } catch(e){ hideLoading(); console.error(e); cont.innerHTML='<div class="empty-state">Error</div>'; }
+        }
 
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
-                }
+        window.toggleLike = async (pid)=>{
+            if(!currentUser) return Swal.fire('⚠️','Login dulu','warning');
+            try { const d = await safeFetch(`${API_URL}/like/${pid}`, { method:'POST', headers:{'Authorization':`Bearer ${token}`} });
+                if(d.success){ const a=document.querySelector('.nav-item.active').id; if(a==='homeNav') loadPosts('all'); else loadPosts('my'); }
+            } catch(e){ Swal.fire('❌',e.message,'error'); }
+        };
 
-                const data = await response.json();
-                hideLoading();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Berhasil!',
-                        text: 'Foto berhasil diupload',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    document.getElementById('fileInput').value = '';
-                    document.getElementById('caption').value = '';
-                    document.getElementById('preview').style.display = 'none';
-
-                    setTimeout(() => {
-                        document.getElementById('homeNav').click();
-                    }, 1500);
-                } else {
-                    Swal.fire('❌', data.message, 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                Swal.fire('❌', 'Error: ' + error.message, 'error');
-            }
-        });
-
-        // ================== LOAD POSTS ==================
-        async function loadPosts(type = 'all') {
+        window.deletePost = async (pid)=>{
+            if(!confirm('Hapus?')) return;
             try {
-                showLoading('Loading posts...');
-
-                let url = `${API_URL}/posts`;
-                if (type === 'my' && currentUser) {
-                    url = `${API_URL}/posts/user/${currentUser.id}`;
-                }
-
-                const data = await safeFetch(url);
+                showLoading('Hapus...');
+                const d = await safeFetch(`${API_URL}/post/${pid}`, { method:'DELETE', headers:{'Authorization':`Bearer ${token}`} });
                 hideLoading();
+                if(d.success){ Swal.fire('✅','Terhapus','success'); const a=document.querySelector('.nav-item.active').id; if(a==='homeNav') loadPosts('all'); else loadPosts('my'); }
+                else Swal.fire('❌',d.message,'error');
+            } catch(e){ hideLoading(); Swal.fire('❌',e.message,'error'); }
+        };
 
-                const container = type === 'all' ? 
-                    document.getElementById('galleryContainer') : 
-                    document.getElementById('myPhotosContainer');
+        // ========== CHAT FUNCTIONS ==========
+        async function loadConversations(showLoad = true) {
+            if (!currentUser) return;
+            try {
+                if (showLoad) showLoading('Memuat percakapan...');
+                const d = await safeFetch(`${API_URL}/messages/conversations`, { headers:{'Authorization':`Bearer ${token}`} });
+                if (showLoad) hideLoading();
+                conversations = d.conversations || [];
+                renderConversations();
+            } catch (e) {
+                if (showLoad) hideLoading();
+                console.error(e);
+            }
+        }
 
-                if (!data.posts || data.posts.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-images"></i>
-                            <h3>Belum ada foto</h3>
-                            <p>${type === 'all' ? 'Upload foto pertamamu sekarang!' : 'Kamu belum upload foto'}</p>
+        function renderConversations() {
+            const list = document.getElementById('conversationsList');
+            if (!conversations.length) {
+                list.innerHTML = '<div class="empty-state">Belum ada percakapan</div>';
+                return;
+            }
+            let html = '';
+            conversations.forEach(c => {
+                const activeClass = currentChatUserId == c.user_id ? 'active' : '';
+                const unread = c.unread_count > 0 ? `<span class="unread-badge">${c.unread_count}</span>` : '';
+                const lastTime = c.last_time ? new Date(c.last_time).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+                html += `
+                    <div class="conversation-item ${activeClass}" onclick="selectConversation(${c.user_id}, '${c.username}')">
+                        <div class="conversation-avatar">${c.username.charAt(0).toUpperCase()}</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">${c.username}</div>
+                            <div class="conversation-last">${c.last_message || ''}</div>
                         </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-                for (let post of data.posts) {
-                    html += `
-                        <div class="photo-card">
-                            <img src="${post.image_url}" class="photo-image" onerror="this.src='https://via.placeholder.com/300?text=Error'">
-                            <div class="photo-details">
-                                <div class="photo-header">
-                                    <span class="photo-author">👤 ${post.username}</span>
-                                    <span class="photo-date">${new Date(post.created_at).toLocaleDateString('id-ID')}</span>
-                                </div>
-                                <p class="photo-caption">${post.caption}</p>
-                                <div class="photo-stats">
-                                    <span>❤️ ${post.likes_count || 0} likes</span>
-                                </div>
-                                ${currentUser ? `
-                                    <div class="photo-actions">
-                                        <button class="like-btn" onclick="toggleLike(${post.id})">🤍 Like</button>
-                                        ${post.user_id === currentUser.id ? 
-                                            `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : 
-                                            ''
-                                        }
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = html;
-
-            } catch (error) {
-                hideLoading();
-                console.error('Error loading posts:', error);
-                const container = type === 'all' ? 
-                    document.getElementById('galleryContainer') : 
-                    document.getElementById('myPhotosContainer');
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Error loading posts</h3>
-                        <p>${error.message}</p>
+                        <div class="conversation-time">${lastTime}</div>
+                        ${unread}
                     </div>
                 `;
+            });
+            list.innerHTML = html;
+        }
+
+        window.selectConversation = async (userId, username) => {
+            currentChatUserId = userId;
+            document.getElementById('chatHeader').innerHTML = `<strong>${username}</strong>`;
+            document.getElementById('chatInputArea').style.display = 'flex';
+            await loadMessages(userId, true);
+            // highlight percakapan
+            renderConversations();
+        };
+
+        async function loadMessages(userId, showLoad = true) {
+            if (!userId) return;
+            try {
+                if (showLoad) showLoading('Memuat pesan...');
+                const d = await safeFetch(`${API_URL}/messages/with/${userId}`, { headers:{'Authorization':`Bearer ${token}`} });
+                if (showLoad) hideLoading();
+                renderMessages(d.messages || []);
+                // scroll ke bawah
+                setTimeout(() => {
+                    const msgDiv = document.getElementById('chatMessages');
+                    msgDiv.scrollTop = msgDiv.scrollHeight;
+                }, 100);
+            } catch (e) {
+                if (showLoad) hideLoading();
+                console.error(e);
             }
         }
 
-        // ================== LIKE FUNCTION ==================
-        window.toggleLike = async function(postId) {
-            if (!currentUser || !token) {
-                Swal.fire('⚠️', 'Login dulu untuk like!', 'warning');
+        function renderMessages(messages) {
+            const container = document.getElementById('chatMessages');
+            if (!messages.length) {
+                container.innerHTML = '<div class="empty-state">Belum ada pesan. Kirim pesan pertama!</div>';
                 return;
             }
-
-            try {
-                const data = await safeFetch(`${API_URL}/like/${postId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (data.success) {
-                    const activeNav = document.querySelector('.nav-item.active').id;
-                    if (activeNav === 'homeNav') loadPosts('all');
-                    else if (activeNav === 'myPhotosNav') loadPosts('my');
-                }
-            } catch (error) {
-                console.error('Like error:', error);
-                Swal.fire('❌', 'Error: ' + error.message, 'error');
-            }
-        };
-
-        // ================== DELETE POST ==================
-        window.deletePost = async function(postId) {
-            if (!confirm('Yakin ingin menghapus foto ini?')) return;
-
-            try {
-                showLoading('Menghapus...');
-                const data = await safeFetch(`${API_URL}/post/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                hideLoading();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Berhasil!',
-                        text: 'Foto berhasil dihapus',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    const activeNav = document.querySelector('.nav-item.active').id;
-                    if (activeNav === 'homeNav') loadPosts('all');
-                    else if (activeNav === 'myPhotosNav') loadPosts('my');
-                } else {
-                    Swal.fire('❌', data.message, 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                Swal.fire('❌', 'Error: ' + error.message, 'error');
-            }
-        };
-
-        // ================== CHECK SESSION ==================
-        async function checkSession() {
-            const savedUser = localStorage.getItem('user');
-            const savedToken = localStorage.getItem('token');
-
-            if (savedUser && savedToken) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    token = savedToken;
-
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    document.getElementById('displayUsername').textContent = currentUser.username;
-
-                    loadPosts('all');
-                } catch (e) {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    checkConnection();
-                }
-            } else {
-                checkConnection();
-            }
+            let html = '';
+            messages.forEach(m => {
+                const isSent = m.sender_id === currentUser.id;
+                const time = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                html += `
+                    <div class="message ${isSent ? 'sent' : 'received'}">
+                        <div>${m.message}</div>
+                        <div class="message-info">${time}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
         }
 
-        // Initialize
-        checkSession();
+        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (!msg || !currentChatUserId) return;
+            input.value = '';
+            try {
+                const d = await safeFetch(`${API_URL}/messages/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ receiver_id: currentChatUserId, message: msg })
+                });
+                if (d.success) {
+                    // refresh pesan
+                    loadMessages(currentChatUserId, false);
+                    // update percakapan
+                    loadConversations(false);
+                }
+            } catch (e) {
+                Swal.fire('❌', e.message, 'error');
+            }
+        });
+
+        // Pencarian user
+        let searchTimeout;
+        document.getElementById('chatSearchInput').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const q = e.target.value.trim();
+            if (q.length < 2) {
+                document.getElementById('userSearchResults').style.display = 'none';
+                return;
+            }
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const d = await safeFetch(`${API_URL}/users/search?q=${encodeURIComponent(q)}`, { headers:{'Authorization':`Bearer ${token}`} });
+                    const resultsDiv = document.getElementById('userSearchResults');
+                    if (d.users && d.users.length) {
+                        let html = '';
+                        d.users.forEach(u => {
+                            html += `<div class="user-search-item" onclick="startChatWith(${u.id}, '${u.username}')">${u.username}</div>`;
+                        });
+                        resultsDiv.innerHTML = html;
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        resultsDiv.style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }, 500);
+        });
+
+        window.startChatWith = (userId, username) => {
+            document.getElementById('chatSearchInput').value = '';
+            document.getElementById('userSearchResults').style.display = 'none';
+            selectConversation(userId, username);
+        };
+
+        // ========== SESSION CHECK ==========
+        (async ()=>{
+            const su = localStorage.getItem('user'), st = localStorage.getItem('token');
+            if(su && st){
+                try { currentUser=JSON.parse(su); token=st; document.getElementById('authContainer').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('displayUsername').textContent=currentUser.username; loadPosts('all'); }
+                catch(e){ localStorage.clear(); checkConnection(); }
+            } else checkConnection();
+        })();
     </script>
 </body>
 </html>
