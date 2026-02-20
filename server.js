@@ -324,6 +324,40 @@ app.get('/api/users/search', verifyToken, (req, res) => {
         }
     );
 });
+
+// ========== CHAT PUBLIK ==========
+
+// Ambil semua pesan publik
+app.get('/api/public-messages', (req, res) => {
+    const query = `
+        SELECT pm.*, u.username, u.avatar_url,
+               (SELECT username FROM users WHERE id = u.id) as sender_name
+        FROM public_messages pm
+        JOIN users u ON pm.user_id = u.id
+        ORDER BY pm.created_at ASC
+    `;
+    pool.query(query, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        res.json({ success: true, messages: results });
+    });
+});
+
+// Kirim pesan publik
+app.post('/api/public-messages', verifyToken, (req, res) => {
+    const { message, reply_to } = req.body;
+    if (!message || message.trim() === '') {
+        return res.status(400).json({ success: false, message: 'Pesan tidak boleh kosong' });
+    }
+    pool.query(
+        'INSERT INTO public_messages (user_id, message, reply_to) VALUES (?, ?, ?)',
+        [req.userId, message, reply_to || null],
+        (err, result) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            res.json({ success: true, message: 'Pesan terkirim', id: result.insertId });
+        }
+    );
+});
+
 // ========== JALANKAN SERVER ==========
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
