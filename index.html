@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyGalleryApp - Simpan Fotoku</title>
+    <title>GalleryApp - Simpan Foto di GitHub</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,6 @@
             min-height: 100vh;
         }
 
-        /* Container Utama */
         .app-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -373,6 +372,17 @@
             flex: 1;
         }
 
+        .download-btn {
+            padding: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+
         /* Edit Modal */
         .modal {
             display: none;
@@ -436,6 +446,27 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .navbar {
@@ -468,7 +499,7 @@
         <div id="authContainer" class="auth-container">
             <!-- Login Card -->
             <div id="loginCard" class="auth-card">
-                <h2>📸 Selamat Datang</h2>
+                <h2>📸 GalleryApp</h2>
                 <div class="input-field">
                     <label>Username</label>
                     <input type="text" id="loginUsername" placeholder="Masukkan username">
@@ -511,6 +542,7 @@
                 <div class="nav-menu">
                     <div class="nav-item active" onclick="showPage('home')">🏠 Beranda</div>
                     <div class="nav-item" onclick="showPage('upload')">📤 Upload Foto</div>
+                    <div class="nav-item" onclick="showPage('myphotos')">🖼️ Fotoku</div>
                 </div>
                 <div class="user-section">
                     <span class="username-badge" id="displayUsername"></span>
@@ -523,13 +555,23 @@
 
             <!-- Content Area -->
             <div class="content">
-                <!-- Home Page -->
+                <!-- Home Page (Semua Foto) -->
                 <div id="homePage">
                     <div class="page-header">
-                        <h2>📸 Gallery Foto</h2>
+                        <h2>📸 Semua Foto</h2>
                     </div>
                     <div id="galleryContainer" class="gallery-grid">
                         <!-- Gallery will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Photos Page -->
+                <div id="myPhotosPage" style="display: none;">
+                    <div class="page-header">
+                        <h2>🖼️ Fotoku</h2>
+                    </div>
+                    <div id="myPhotosContainer" class="gallery-grid">
+                        <!-- My photos will be loaded here -->
                     </div>
                 </div>
 
@@ -542,6 +584,7 @@
                         <div class="file-upload" onclick="document.getElementById('fileInput').click()">
                             <i>📁</i>
                             <p>Klik untuk pilih foto</p>
+                            <p style="font-size: 12px; color: #999;">Foto akan disimpan di folder img/ GitHub</p>
                             <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
                         </div>
                         <img id="preview" class="image-preview" alt="Preview">
@@ -564,18 +607,35 @@
     </div>
 
     <script>
+        // Configuration
+        const GITHUB_USERNAME = 'username-anda'; // Ganti dengan username GitHub Anda
+        const REPO_NAME = 'gallery-app'; // Ganti dengan nama repo Anda
+        const GITHUB_TOKEN = 'token_github_anda'; // Ganti dengan token GitHub Anda
+        
         // Initialize database
         let currentUser = null;
         let currentEditId = null;
+        let allPosts = [];
 
         // Load data dari localStorage
         function initDatabase() {
             if (!localStorage.getItem('users')) {
                 localStorage.setItem('users', JSON.stringify([]));
             }
-            if (!localStorage.getItem('photos')) {
-                localStorage.setItem('photos', JSON.stringify([]));
+            if (!localStorage.getItem('posts')) {
+                localStorage.setItem('posts', JSON.stringify([]));
             }
+            loadPosts();
+        }
+
+        // Load posts dari localStorage
+        function loadPosts() {
+            allPosts = JSON.parse(localStorage.getItem('posts')) || [];
+        }
+
+        // Save posts ke localStorage
+        function savePosts() {
+            localStorage.setItem('posts', JSON.stringify(allPosts));
         }
 
         // Auth Functions
@@ -648,7 +708,7 @@
                 
                 showAlert(`Selamat datang, ${username}!`, 'success');
                 showPage('home');
-                loadGallery();
+                refreshGallery();
                 
                 document.getElementById('loginUsername').value = '';
                 document.getElementById('loginPassword').value = '';
@@ -671,11 +731,19 @@
             if (page === 'home') {
                 document.querySelectorAll('.nav-item')[0].classList.add('active');
                 document.getElementById('homePage').style.display = 'block';
+                document.getElementById('myPhotosPage').style.display = 'none';
                 document.getElementById('uploadPage').style.display = 'none';
-                loadGallery();
+                refreshGallery();
+            } else if (page === 'myphotos') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'block';
+                document.getElementById('uploadPage').style.display = 'none';
+                showMyPhotos();
             } else {
                 document.querySelectorAll('.nav-item')[1].classList.add('active');
                 document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'none';
                 document.getElementById('uploadPage').style.display = 'block';
                 
                 // Reset form upload
@@ -700,8 +768,78 @@
             }
         }
 
-        // Upload Photo
-        function handleUpload() {
+        // Generate filename untuk GitHub
+        function generateFileName() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `photo_${timestamp}_${random}.jpg`;
+        }
+
+        // Upload ke GitHub
+        async function uploadToGitHub(file, fileName) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        // Ambil base64 data
+                        const base64Data = e.target.result.split(',')[1];
+                        
+                        // Buat content untuk GitHub API
+                        const content = base64Data;
+                        
+                        // GitHub API URL
+                        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/img/${fileName}`;
+                        
+                        // Cek apakah file sudah ada
+                        const checkResponse = await fetch(url, {
+                            headers: {
+                                'Authorization': `token ${GITHUB_TOKEN}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        });
+                        
+                        let sha = null;
+                        if (checkResponse.ok) {
+                            const data = await checkResponse.json();
+                            sha = data.sha;
+                        }
+                        
+                        // Upload file
+                        const uploadResponse = await fetch(url, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `token ${GITHUB_TOKEN}`,
+                                'Accept': 'application/vnd.github.v3+json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `Upload foto ${fileName}`,
+                                content: content,
+                                sha: sha,
+                                branch: 'main'
+                            })
+                        });
+                        
+                        if (uploadResponse.ok) {
+                            const data = await uploadResponse.json();
+                            // Dapatkan raw URL dari GitHub
+                            const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/img/${fileName}`;
+                            resolve(rawUrl);
+                        } else {
+                            reject('Gagal upload ke GitHub');
+                        }
+                    } catch (error) {
+                        reject(error.message);
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Handle Upload
+        async function handleUpload() {
             const fileInput = document.getElementById('fileInput');
             const caption = document.getElementById('caption').value;
             const preview = document.getElementById('preview');
@@ -716,33 +854,61 @@
                 return;
             }
 
-            const photos = JSON.parse(localStorage.getItem('photos'));
-            
-            const newPhoto = {
-                id: Date.now(),
-                username: currentUser,
-                image: preview.src,
-                caption: caption,
-                created_at: new Date().toLocaleString('id-ID')
-            };
+            showLoading(true);
 
-            photos.push(newPhoto);
-            localStorage.setItem('photos', JSON.stringify(photos));
+            try {
+                const fileName = generateFileName();
+                const imageUrl = await uploadToGitHub(fileInput.files[0], fileName);
+                
+                const newPost = {
+                    id: Date.now(),
+                    username: currentUser,
+                    imageUrl: imageUrl,
+                    fileName: fileName,
+                    caption: caption,
+                    created_at: new Date().toLocaleString('id-ID')
+                };
 
-            showAlert('Foto berhasil diupload!', 'success');
-            
-            // Reset form dan kembali ke home
-            setTimeout(() => {
-                showPage('home');
-            }, 1000);
+                allPosts.push(newPost);
+                savePosts();
+
+                showAlert('Foto berhasil diupload ke GitHub!', 'success');
+                
+                // Reset form dan kembali ke home
+                setTimeout(() => {
+                    showPage('home');
+                }, 1500);
+                
+            } catch (error) {
+                showAlert('Gagal upload: ' + error, 'error');
+            } finally {
+                showLoading(false);
+            }
         }
 
-        // Load Gallery
-        function loadGallery() {
-            const photos = JSON.parse(localStorage.getItem('photos'));
+        // Show loading
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loadingIndicator');
+            if (show) {
+                if (!loadingDiv) {
+                    const div = document.createElement('div');
+                    div.id = 'loadingIndicator';
+                    div.className = 'loading';
+                    div.innerHTML = '<div class="spinner"></div><p>Uploading ke GitHub...</p>';
+                    document.querySelector('.content').appendChild(div);
+                }
+            } else {
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            }
+        }
+
+        // Refresh Gallery
+        function refreshGallery() {
             const container = document.getElementById('galleryContainer');
             
-            if (photos.length === 0) {
+            if (allPosts.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i>📷</i>
@@ -754,25 +920,29 @@
             }
 
             // Urutkan dari yang terbaru
-            photos.sort((a, b) => b.id - a.id);
+            const sortedPosts = [...allPosts].sort((a, b) => b.id - a.id);
 
             let html = '';
-            photos.forEach(photo => {
+            sortedPosts.forEach(post => {
                 html += `
                     <div class="photo-card">
-                        <img src="${photo.image}" class="photo-image" alt="Photo">
+                        <img src="${post.imageUrl}" class="photo-image" alt="Photo" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading'">
                         <div class="photo-details">
                             <div class="photo-header">
-                                <span class="photo-author">👤 ${photo.username}</span>
-                                <span class="photo-date">${photo.created_at}</span>
+                                <span class="photo-author">👤 ${post.username}</span>
+                                <span class="photo-date">${post.created_at}</span>
                             </div>
-                            <p class="photo-caption">${photo.caption}</p>
-                            ${photo.username === currentUser ? `
+                            <p class="photo-caption">${post.caption}</p>
+                            ${post.username === currentUser ? `
                                 <div class="photo-actions">
-                                    <button class="edit-btn" onclick="openEditModal(${photo.id})">✏️ Edit</button>
-                                    <button class="delete-btn" onclick="handleDelete(${photo.id})">🗑️ Hapus</button>
+                                    <button class="edit-btn" onclick="openEditModal(${post.id})">✏️ Edit</button>
+                                    <button class="delete-btn" onclick="handleDelete(${post.id})">🗑️ Hapus</button>
                                 </div>
-                            ` : ''}
+                            ` : `
+                                <div class="photo-actions">
+                                    <button class="download-btn" onclick="downloadImage('${post.imageUrl}', '${post.fileName}')">📥 Download</button>
+                                </div>
+                            `}
                         </div>
                     </div>
                 `;
@@ -781,14 +951,129 @@
             container.innerHTML = html;
         }
 
+        // Show My Photos
+        function showMyPhotos() {
+            const container = document.getElementById('myPhotosContainer');
+            const myPosts = allPosts.filter(post => post.username === currentUser);
+            
+            if (myPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i>🖼️</i>
+                        <h3>Kamu belum punya foto</h3>
+                        <p>Upload foto pertamamu sekarang!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Urutkan dari yang terbaru
+            const sortedPosts = [...myPosts].sort((a, b) => b.id - a.id);
+
+            let html = '';
+            sortedPosts.forEach(post => {
+                html += `
+                    <div class="photo-card">
+                        <img src="${post.imageUrl}" class="photo-image" alt="Photo" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading'">
+                        <div class="photo-details">
+                            <div class="photo-header">
+                                <span class="photo-author">👤 ${post.username}</span>
+                                <span class="photo-date">${post.created_at}</span>
+                            </div>
+                            <p class="photo-caption">${post.caption}</p>
+                            <div class="photo-actions">
+                                <button class="edit-btn" onclick="openEditModal(${post.id})">✏️ Edit</button>
+                                <button class="delete-btn" onclick="handleDelete(${post.id})">🗑️ Hapus</button>
+                                <button class="download-btn" onclick="downloadImage('${post.imageUrl}', '${post.fileName}')">📥 Download</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Download Image
+        function downloadImage(url, filename) {
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                })
+                .catch(() => {
+                    showAlert('Gagal download foto', 'error');
+                });
+        }
+
+        // Delete from GitHub
+        async function deleteFromGitHub(fileName) {
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/img/${fileName}`;
+                
+                // Dapatkan SHA file
+                const getResponse = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (getResponse.ok) {
+                    const data = await getResponse.json();
+                    
+                    // Delete file
+                    await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Hapus foto ${fileName}`,
+                            sha: data.sha,
+                            branch: 'main'
+                        })
+                    });
+                }
+            } catch (error) {
+                console.error('Gagal hapus dari GitHub:', error);
+            }
+        }
+
+        // Handle Delete
+        async function handleDelete(id) {
+            if (confirm('Yakin ingin menghapus foto ini?')) {
+                const post = allPosts.find(p => p.id === id);
+                
+                if (post && post.username === currentUser) {
+                    // Hapus dari GitHub
+                    await deleteFromGitHub(post.fileName);
+                    
+                    // Hapus dari array
+                    allPosts = allPosts.filter(p => p.id !== id);
+                    savePosts();
+                    
+                    showAlert('Foto berhasil dihapus!', 'success');
+                    refreshGallery();
+                    if (document.getElementById('myPhotosPage').style.display === 'block') {
+                        showMyPhotos();
+                    }
+                }
+            }
+        }
+
         // Edit Functions
         function openEditModal(id) {
-            const photos = JSON.parse(localStorage.getItem('photos'));
-            const photo = photos.find(p => p.id === id);
+            const post = allPosts.find(p => p.id === id);
             
-            if (photo && photo.username === currentUser) {
+            if (post && post.username === currentUser) {
                 currentEditId = id;
-                document.getElementById('editCaption').value = photo.caption;
+                document.getElementById('editCaption').value = post.caption;
                 document.getElementById('editModal').style.display = 'flex';
             }
         }
@@ -806,28 +1091,18 @@
                 return;
             }
 
-            const photos = JSON.parse(localStorage.getItem('photos'));
-            const index = photos.findIndex(p => p.id === currentEditId);
+            const index = allPosts.findIndex(p => p.id === currentEditId);
             
-            if (index !== -1 && photos[index].username === currentUser) {
-                photos[index].caption = newCaption;
-                localStorage.setItem('photos', JSON.stringify(photos));
+            if (index !== -1 && allPosts[index].username === currentUser) {
+                allPosts[index].caption = newCaption;
+                savePosts();
                 
                 showAlert('Caption berhasil diupdate!', 'success');
                 closeModal();
-                loadGallery();
-            }
-        }
-
-        // Delete Function
-        function handleDelete(id) {
-            if (confirm('Yakin ingin menghapus foto ini?')) {
-                const photos = JSON.parse(localStorage.getItem('photos'));
-                const filteredPhotos = photos.filter(p => p.id !== id);
-                
-                localStorage.setItem('photos', JSON.stringify(filteredPhotos));
-                showAlert('Foto berhasil dihapus!', 'success');
-                loadGallery();
+                refreshGallery();
+                if (document.getElementById('myPhotosPage').style.display === 'block') {
+                    showMyPhotos();
+                }
             }
         }
 
