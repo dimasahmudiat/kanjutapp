@@ -1,39 +1,760 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Test Koneksi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GalleryApp - Berhasil Terkoneksi</title>
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .auth-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        .auth-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .main-app {
+            display: none;
+            background: #f5f5f5;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .username-badge {
+            font-weight: 600;
+            background: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        .logout-btn {
+            padding: 8px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .content {
+            padding: 30px;
+        }
+        .page-header h2 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .photo-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .photo-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .photo-details {
+            padding: 20px;
+        }
+        .photo-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .photo-author {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .photo-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .like-btn {
+            padding: 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .like-btn.liked {
+            background: #ff6b6b;
+            color: white;
+        }
+        .delete-btn {
+            padding: 8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .file-upload {
+            border: 3px dashed #667eea;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .file-upload input {
+            display: none;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            min-height: 100px;
+            margin-bottom: 20px;
+        }
+        .comments-section {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        .comment {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .comment-author {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .comment-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .comment-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            grid-column: 1/-1;
+        }
+    </style>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <h1>Test Koneksi Supabase</h1>
-    <div id="status">Loading...</div>
+    <div class="container">
+        <!-- Auth Container -->
+        <div id="authContainer" class="auth-container">
+            <!-- Login -->
+            <div id="loginCard" class="auth-card">
+                <h2>📸 GalleryApp</h2>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button class="btn" onclick="handleLogin()">Login</button>
+                <div class="auth-link">
+                    Belum punya akun? <a onclick="showRegister()">Daftar</a>
+                </div>
+            </div>
+
+            <!-- Register -->
+            <div id="registerCard" class="auth-card" style="display: none;">
+                <h2>📝 Daftar</h2>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" placeholder="Email">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Password">
+                </div>
+                <div class="input-group">
+                    <label>Konfirmasi</label>
+                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi">
+                </div>
+                <button class="btn" onclick="handleRegister()">Daftar</button>
+                <button class="btn btn-secondary" onclick="showLogin()">Kembali</button>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp" class="main-app">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="nav-brand">GalleryApp</div>
+                <div class="nav-menu">
+                    <div class="nav-item active" onclick="showPage('home')">🏠 Beranda</div>
+                    <div class="nav-item" onclick="showPage('upload')">📤 Upload</div>
+                    <div class="nav-item" onclick="showPage('myphotos')">🖼️ Fotoku</div>
+                </div>
+                <div class="user-section">
+                    <span class="username-badge" id="displayUsername"></span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            </nav>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Home -->
+                <div id="homePage">
+                    <div class="page-header"><h2>📸 Semua Foto</h2></div>
+                    <div id="galleryContainer" class="gallery-grid"></div>
+                </div>
+
+                <!-- My Photos -->
+                <div id="myPhotosPage" style="display: none;">
+                    <div class="page-header"><h2>🖼️ Fotoku</h2></div>
+                    <div id="myPhotosContainer" class="gallery-grid"></div>
+                </div>
+
+                <!-- Upload -->
+                <div id="uploadPage" style="display: none;">
+                    <div class="upload-section">
+                        <h3>📤 Upload Foto</h3>
+                        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                            <p>Klik untuk pilih foto</p>
+                            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+                        </div>
+                        <img id="preview" class="image-preview">
+                        <textarea id="caption" placeholder="Tulis caption..."></textarea>
+                        <button class="btn" onclick="handleUpload()">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-    // Test koneksi dengan alert
-    alert('Mencoba koneksi ke database...');
+        // ================== KONFIGURASI ==================
+        const SUPABASE_URL = 'https://athsijudenxngliekkbm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
 
-    fetch('https://athsijudenxngliekkbm.supabase.co/rest/v1/', {
-        headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY'
+        // Init Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Global variables
+        let currentUser = null;
+
+        // ================== NOTIFIKASI SAAT PERTAMA BUKA ==================
+        window.addEventListener('load', function() {
+            console.log('Halaman dimuat!');
+            
+            // Test SweetAlert dulu
+            Swal.fire({
+                title: '📸 GalleryApp',
+                text: 'Selamat datang! Mengecek koneksi database...',
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Test koneksi database
+            setTimeout(testConnection, 1000);
+        });
+
+        // Fungsi test koneksi
+        async function testConnection() {
+            try {
+                console.log('Mengecek koneksi database...');
+                
+                const { error } = await supabase
+                    .from('users')
+                    .select('count', { count: 'exact', head: true });
+
+                if (error) {
+                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '⚠️ Tabel Belum Ada',
+                            text: 'Koneksi database berhasil, tapi tabel users belum dibuat. Jalankan SQL di Supabase!',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '❌ Koneksi Gagal',
+                            text: error.message,
+                            confirmButtonText: 'Coba Lagi'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Koneksi Database Berhasil!',
+                        text: 'Supabase terhubung dengan baik',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+
+                // Cek session setelah test koneksi
+                checkSession();
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: error.message,
+                    confirmButtonText: 'OK'
+                });
+            }
         }
-    })
-    .then(res => {
-        document.getElementById('status').innerHTML = 'Status: ' + res.status;
-        if (res.ok) {
-            alert('✅ SUKSES! Koneksi database berhasil');
-            return res.json();
-        } else {
-            alert('❌ GAGAL! Status: ' + res.status);
-            throw new Error('HTTP Error ' + res.status);
+
+        // ================== AUTH FUNCTIONS ==================
+        function showRegister() {
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('registerCard').style.display = 'block';
         }
-    })
-    .then(data => {
-        console.log('Data:', data);
-        alert('Data diterima: ' + JSON.stringify(data).substring(0, 100));
-    })
-    .catch(err => {
-        alert('❌ ERROR: ' + err.message);
-        document.getElementById('status').innerHTML = 'Error: ' + err.message;
-    });
+
+        function showLogin() {
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('registerCard').style.display = 'none';
+        }
+
+        async function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPass = document.getElementById('regConfirmPassword').value;
+
+            if (!username || !email || !password || !confirmPass) {
+                Swal.fire('⚠️ Error', 'Semua field harus diisi!', 'warning');
+                return;
+            }
+
+            if (password !== confirmPass) {
+                Swal.fire('❌ Error', 'Password tidak cocok!', 'error');
+                return;
+            }
+
+            try {
+                Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: { data: { username: username } }
+                });
+
+                if (authError) throw authError;
+
+                const { error: dbError } = await supabase.from('users').insert([{
+                    id: authData.user.id,
+                    username: username,
+                    email: email,
+                    full_name: username
+                }]);
+
+                if (dbError) throw dbError;
+
+                Swal.fire('✅ Sukses', 'Registrasi berhasil! Cek email untuk verifikasi.', 'success');
+                setTimeout(showLogin, 2000);
+
+            } catch (error) {
+                Swal.fire('❌ Gagal', error.message, 'error');
+            }
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                Swal.fire('⚠️ Error', 'Username dan password harus diisi!', 'warning');
+                return;
+            }
+
+            try {
+                Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('email')
+                    .eq('username', username)
+                    .single();
+
+                if (userError) throw new Error('Username tidak ditemukan');
+
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: userData.email,
+                    password: password
+                });
+
+                if (authError) throw new Error('Password salah');
+
+                const { data: fullUserData } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', authData.user.id)
+                    .single();
+
+                currentUser = fullUserData;
+                
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('displayUsername').textContent = fullUserData.username;
+                
+                Swal.fire('✅ Sukses', `Selamat datang, ${fullUserData.username}!`, 'success');
+                showPage('home');
+
+            } catch (error) {
+                Swal.fire('❌ Gagal', error.message, 'error');
+            }
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            currentUser = null;
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            Swal.fire('👋', 'Sampai jumpa lagi!', 'info');
+        }
+
+        // ================== NAVIGASI ==================
+        function showPage(page) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            if (page === 'home') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('homePage').style.display = 'block';
+                document.getElementById('myPhotosPage').style.display = 'none';
+                document.getElementById('uploadPage').style.display = 'none';
+                loadPosts('all');
+            } else if (page === 'myphotos') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'block';
+                document.getElementById('uploadPage').style.display = 'none';
+                loadPosts('my');
+            } else {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'none';
+                document.getElementById('uploadPage').style.display = 'block';
+            }
+        }
+
+        // ================== UPLOAD ==================
+        function previewImage(event) {
+            const file = event.target.fores[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function handleUpload() {
+            const file = document.getElementById('fileInput').files[0];
+            const caption = document.getElementById('caption').value.trim();
+
+            if (!file || !caption) {
+                Swal.fire('⚠️', 'Pilih foto dan tulis caption!', 'warning');
+                return;
+            }
+
+            try {
+                Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const fileName = `${Date.now()}_${file.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('gallery')
+                    .upload(`photos/${fileName}`, file);
+
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(`photos/${fileName}`);
+
+                const { error: postError } = await supabase.from('posts').insert([{
+                    user_id: currentUser.id,
+                    image_url: urlData.publicUrl,
+                    image_filename: fileName,
+                    caption: caption
+                }]);
+
+                if (postError) throw postError;
+
+                Swal.fire('✅', 'Foto berhasil diupload!', 'success');
+                setTimeout(() => showPage('home'), 1500);
+
+            } catch (error) {
+                Swal.fire('❌', error.message, 'error');
+            }
+        }
+
+        // ================== LOAD POSTS ==================
+        async function loadPosts(type = 'all') {
+            try {
+                let query = supabase
+                    .from('posts')
+                    .select('*, users:user_id(username, avatar_url)')
+                    .order('created_at', { ascending: false });
+
+                if (type === 'my' && currentUser) {
+                    query = query.eq('user_id', currentUser.id);
+                }
+
+                const { data: posts, error } = await query;
+
+                if (error) throw error;
+
+                const container = type === 'all' ? 
+                    document.getElementById('galleryContainer') : 
+                    document.getElementById('myPhotosContainer');
+
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<div class="empty-state">📷 Belum ada foto</div>';
+                    return;
+                }
+
+                let html = '';
+                for (let post of posts) {
+                    const { data: likeData } = await supabase
+                        .from('likes')
+                        .select('*')
+                        .eq('post_id', post.id)
+                        .eq('user_id', currentUser?.id)
+                        .maybeSingle();
+
+                    html += `
+                        <div class="photo-card">
+                            <img src="${post.image_url}" class="photo-image">
+                            <div class="photo-details">
+                                <div class="photo-header">
+                                    <span class="photo-author">👤 ${post.users?.username}</span>
+                                    <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <p>${post.caption}</p>
+                                ${currentUser ? `
+                                    <div class="photo-actions">
+                                        <button class="like-btn ${likeData ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                                            ${likeData ? '❤️ Unlike' : '🤍 Like'} (${post.likes_count || 0})
+                                        </button>
+                                        ${post.user_id === currentUser.id ? 
+                                            `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : ''
+                                        }
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function toggleLike(postId) {
+            if (!currentUser) {
+                Swal.fire('⚠️', 'Login dulu untuk like!', 'warning');
+                return;
+            }
+
+            try {
+                const { data: existing } = await supabase
+                    .from('likes')
+                    .select('*')
+                    .eq('post_id', postId)
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+
+                if (existing) {
+                    await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+                    await supabase.rpc('decrement_likes', { post_id: postId });
+                } else {
+                    await supabase.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
+                    await supabase.rpc('increment_likes', { post_id: postId });
+                }
+
+                loadPosts();
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('Hapus foto?')) return;
+
+            try {
+                await supabase.from('posts').delete().eq('id', postId).eq('user_id', currentUser.id);
+                Swal.fire('✅', 'Foto dihapus!', 'success');
+                loadPosts();
+            } catch (error) {
+                Swal.fire('❌', error.message, 'error');
+            }
+        }
+
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { data } = await supabase.from('users').select('*').eq('id', session.user.id).single();
+                if (data) {
+                    currentUser = data;
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('displayUsername').textContent = data.username;
+                    showPage('home');
+                }
+            }
+        }
+
+        // Fungsi increment/decrement (jalankan di Supabase SQL Editor)
+        /*
+        CREATE OR REPLACE FUNCTION increment_likes(post_id BIGINT)
+        RETURNS void AS $$ BEGIN UPDATE posts SET likes_count = likes_count + 1 WHERE id = post_id; END; $$ LANGUAGE plpgsql;
+
+        CREATE OR REPLACE FUNCTION decrement_likes(post_id BIGINT)
+        RETURNS void AS $$ BEGIN UPDATE posts SET likes_count = likes_count - 1 WHERE id = post_id; END; $$ LANGUAGE plpgsql;
+        */
     </script>
 </body>
 </html>
