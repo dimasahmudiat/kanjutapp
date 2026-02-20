@@ -358,4 +358,246 @@ app.post('/api/upload', verifyToken, upload.single('image'), (req, res) => {
     db.query(insertPost, [req.userId, imageUrl, req.file.filename, caption], (err, result) => {
         if (err) {
             return res.status(500).json({ 
-                success
+                success: false, 
+                message: 'Gagal simpan post',
+                error: err.message 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Foto berhasil diupload!',
+            postId: result.insertId
+        });
+    });
+});
+
+// Get all posts
+app.get('/api/posts', (req, res) => {
+    const query = `
+        SELECT p.*, u.username, u.full_name, u.avatar_url,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Gagal load posts',
+                error: err.message 
+            });
+        }
+
+        res.json({
+            success: true,
+            posts: results
+        });
+    });
+});
+
+// Get user posts
+app.get('/api/posts/user/:userId', (req, res) => {
+    const query = `
+        SELECT p.*, u.username, u.full_name, u.avatar_url,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.user_id = ?
+        ORDER BY p.created_at DESC
+    `;
+
+    db.query(query, [req.params.userId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Gagal load posts',
+                error: err.message 
+            });
+        }
+
+        res.json({
+            success: true,
+            posts: results
+        });
+    });
+});
+
+// Like/Unlike post
+app.post('/api/like/:postId', verifyToken, (req, res) => {
+    const postId = req.params.postId;
+
+    // Cek apakah sudah like
+    const checkLike = 'SELECT * FROM likes WHERE user_id = ? AND post_id = ?';
+    db.query(checkLike, [req.userId, postId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database error',
+                error: err.message 
+            });
+        }
+
+        if (results.length > 0) {
+            // Unlike
+            const deleteLike = 'DELETE FROM likes WHERE user_id = ? AND post_id = ?';
+            db.query(deleteLike, [req.userId, postId], (err) => {
+                if (err) {
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: 'Gagal unlike',
+                        error: err.message 
+                    });
+                }
+
+                const updatePost = 'UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?';
+                db.query(updatePost, [postId], (err) => {
+                    if (err) console.error('Error updating likes count:', err);
+                });
+
+                res.json({ 
+                    success: true, 
+                    message: 'Unliked',
+                    liked: false 
+                });
+            });
+        } else {
+            // Like
+            const insertLike = 'INSERT INTO likes (user_id, post_id) VALUES (?, ?)';
+            db.query(insertLike, [req.userId, postId], (err) => {
+                if (err) {
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: 'Gagal like',
+                        error: err.message 
+                    });
+                }
+
+                const updatePost = 'UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?';
+                db.query(updatePost, [postId], (err) => {
+                    if (err) console.error('Error updating likes count:', err);
+                });
+
+                res.json({ 
+                    success: true, 
+                    message: 'Liked',
+                    liked: true 
+                });
+            });
+        }
+    });
+});
+
+// Add comment
+app.post('/api/comment/:postId', verifyToken, (req, res) => {
+    const postId = req.params.postId;
+    const { content } = req.body;
+
+    if (!content) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Komentar tidak boleh kosong!' 
+        });
+    }
+
+    const insertComment = 'INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)';
+    db.query(insertComment, [postId, req.userId, content], (err, result) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Gagal comment',
+                error: err.message 
+            });
+        }
+
+        const updatePost = 'UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?';
+        db.query(updatePost, [postId], (err) => {
+            if (err) console.error('Error updating comments count:', err);
+        });
+
+        res.json({
+            success: true,
+            message: 'Komentar ditambahkan!',
+            commentId: result.insertId
+        });
+    });
+});
+
+// Get comments for a post
+app.get('/api/comments/:postId', (req, res) => {
+    const query = `
+        SELECT c.*, u.username, u.avatar_url
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.post_id = ?
+        ORDER BY c.created_at ASC
+    `;
+
+    db.query(query, [req.params.postId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Gagal load comments',
+                error: err.message 
+            });
+        }
+
+        res.json({
+            success: true,
+            comments: results
+        });
+    });
+});
+
+// Delete post
+app.delete('/api/post/:postId', verifyToken, (req, res) => {
+    const postId = req.params.postId;
+
+    // Cek apakah post milik user
+    const checkPost = 'SELECT * FROM posts WHERE id = ? AND user_id = ?';
+    db.query(checkPost, [postId, req.userId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database error',
+                error: err.message 
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Anda tidak berhak menghapus post ini!' 
+            });
+        }
+
+        const deletePost = 'DELETE FROM posts WHERE id = ?';
+        db.query(deletePost, [postId], (err) => {
+            if (err) {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Gagal hapus post',
+                    error: err.message 
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Post berhasil dihapus!'
+            });
+        });
+    });
+});
+
+// Serve static files
+app.use('/uploads', express.static('uploads'));
+
+// ================== START SERVER ==================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+});
