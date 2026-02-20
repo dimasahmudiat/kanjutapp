@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - Simpan Foto di GitHub</title>
+    <title>GalleryApp - Supabase</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         body {
@@ -17,13 +17,13 @@
             min-height: 100vh;
         }
 
-        .app-container {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Auth Pages */
+        /* Auth Container */
         .auth-container {
             display: flex;
             justify-content: center;
@@ -35,57 +35,39 @@
             background: white;
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 400px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .auth-card h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #333;
-            font-size: 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .input-field {
+        .input-group {
             margin-bottom: 20px;
         }
 
-        .input-field label {
+        .input-group label {
             display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
         }
 
-        .input-field input {
+        .input-group input {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e1e1e1;
             border-radius: 10px;
             font-size: 16px;
-            transition: all 0.3s;
         }
 
-        .input-field input:focus {
+        .input-group input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
@@ -98,17 +80,16 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
             margin-bottom: 10px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            background: #95a5a6;
         }
 
         .auth-link {
@@ -136,7 +117,7 @@
         .navbar {
             background: white;
             padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -146,22 +127,18 @@
         .nav-brand {
             font-size: 24px;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #667eea;
         }
 
         .nav-menu {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .nav-item {
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 10px;
-            transition: all 0.3s;
             font-weight: 500;
         }
 
@@ -170,22 +147,19 @@
         }
 
         .nav-item.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
         }
 
-        .user-section {
+        .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .username-badge {
+        .username {
             font-weight: 600;
             color: #333;
-            background: #f0f0f0;
-            padding: 5px 15px;
-            border-radius: 20px;
         }
 
         .logout-btn {
@@ -195,93 +169,11 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
         }
 
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
-        /* Content Area */
+        /* Content */
         .content {
             padding: 30px;
-        }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 30px;
-        }
-
-        .page-header h2 {
-            color: #333;
-            font-size: 28px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-            display: inline-block;
-        }
-
-        /* Upload Form */
-        .upload-form {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .file-upload {
-            border: 3px dashed #667eea;
-            padding: 30px;
-            text-align: center;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-        }
-
-        .file-upload:hover {
-            background: #f8f9ff;
-            border-color: #764ba2;
-        }
-
-        .file-upload i {
-            font-size: 50px;
-            color: #667eea;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .file-upload input {
-            display: none;
-        }
-
-        .image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            margin: 20px 0;
-            border-radius: 10px;
-            display: none;
-        }
-
-        .image-preview.show {
-            display: block;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 10px;
-            font-size: 16px;
-            min-height: 100px;
-            resize: vertical;
-            margin-bottom: 20px;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
         }
 
         /* Gallery Grid */
@@ -296,39 +188,28 @@
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .photo-image {
             width: 100%;
-            height: 250px;
+            height: 300px;
             object-fit: cover;
         }
 
-        .photo-details {
+        .photo-info {
             padding: 20px;
         }
 
         .photo-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 10px;
         }
 
         .photo-author {
             font-weight: 600;
             color: #667eea;
-            background: #f0f0f0;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 14px;
         }
 
         .photo-date {
@@ -338,76 +219,107 @@
 
         .photo-caption {
             color: #666;
-            line-height: 1.6;
-            margin: 15px 0;
-            font-size: 15px;
+            margin: 10px 0;
+        }
+
+        .photo-stats {
+            display: flex;
+            gap: 15px;
+            color: #999;
+            font-size: 14px;
+            margin: 10px 0;
         }
 
         .photo-actions {
             display: flex;
             gap: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .like-btn, .delete-btn, .comment-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .like-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .like-btn.liked {
+            background: #ff6b6b;
+            color: white;
         }
 
         .delete-btn {
-            padding: 8px;
             background: #e74c3c;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
         }
 
-        .edit-btn {
-            padding: 8px;
-            background: #f39c12;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
-        }
-
-        .download-btn {
-            padding: 8px;
+        .comment-btn {
             background: #3498db;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
         }
 
-        /* Edit Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
+        /* Upload Form */
+        .upload-form {
             background: white;
             padding: 30px;
             border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .modal-content h3 {
+        .file-upload {
+            border: 3px dashed #667eea;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
             margin-bottom: 20px;
-            color: #333;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            min-height: 100px;
+            margin-bottom: 20px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         /* Empty State */
@@ -415,38 +327,10 @@
             text-align: center;
             padding: 50px;
             color: #999;
-            font-size: 18px;
             grid-column: 1/-1;
         }
 
-        .empty-state i {
-            font-size: 80px;
-            color: #ddd;
-            margin-bottom: 20px;
-            display: block;
-        }
-
-        /* Alert */
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Loading Spinner */
+        /* Loading */
         .loading {
             text-align: center;
             padding: 50px;
@@ -467,7 +351,46 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive */
+        /* Comments Section */
+        .comments-section {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .comment {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .comment-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .comment-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .comment-input button {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 padding: 15px;
@@ -479,164 +402,104 @@
                 margin: 10px 0;
             }
             
-            .content {
-                padding: 20px;
-            }
-            
             .gallery-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .photo-actions {
-                flex-direction: column;
-            }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="app-container">
+    <div class="container">
         <!-- Auth Container -->
         <div id="authContainer" class="auth-container">
-            <!-- Login Card -->
+            <!-- Login -->
             <div id="loginCard" class="auth-card">
                 <h2>📸 GalleryApp</h2>
-                <div class="input-field">
+                <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="loginUsername" placeholder="Masukkan username">
+                    <input type="text" id="loginUsername" placeholder="Username">
                 </div>
-                <div class="input-field">
+                <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Masukkan password">
+                    <input type="password" id="loginPassword" placeholder="Password">
                 </div>
-                <button class="btn" onclick="handleLogin()">Login</button>
+                <button class="btn" onclick="login()">Login</button>
                 <div class="auth-link">
-                    Belum punya akun? <a onclick="showRegister()">Daftar disini</a>
+                    Belum punya akun? <a onclick="showRegister()">Daftar</a>
                 </div>
             </div>
 
-            <!-- Register Card -->
+            <!-- Register -->
             <div id="registerCard" class="auth-card" style="display: none;">
-                <h2>📝 Daftar Akun Baru</h2>
-                <div class="input-field">
+                <h2>📝 Daftar Akun</h2>
+                <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="regUsername" placeholder="Pilih username">
+                    <input type="text" id="regUsername" placeholder="Username">
                 </div>
-                <div class="input-field">
+                <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="regPassword" placeholder="Buat password">
+                    <input type="password" id="regPassword" placeholder="Password">
                 </div>
-                <div class="input-field">
+                <div class="input-group">
                     <label>Konfirmasi Password</label>
-                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi password">
+                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
                 </div>
-                <button class="btn" onclick="handleRegister()">Daftar</button>
-                <button class="btn btn-secondary" onclick="showLogin()">Kembali ke Login</button>
+                <button class="btn" onclick="register()">Daftar</button>
+                <button class="btn btn-secondary" onclick="showLogin()">Kembali</button>
             </div>
         </div>
 
-        <!-- Main App Container -->
+        <!-- Main App -->
         <div id="mainApp" class="main-app">
             <!-- Navbar -->
             <nav class="navbar">
-                <div class="nav-brand">MyGalleryApp</div>
+                <div class="nav-brand">GalleryApp</div>
                 <div class="nav-menu">
                     <div class="nav-item active" onclick="showPage('home')">🏠 Beranda</div>
-                    <div class="nav-item" onclick="showPage('upload')">📤 Upload Foto</div>
-                    <div class="nav-item" onclick="showPage('myphotos')">🖼️ Fotoku</div>
+                    <div class="nav-item" onclick="showPage('upload')">📤 Upload</div>
                 </div>
-                <div class="user-section">
-                    <span class="username-badge" id="displayUsername"></span>
-                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                <div class="user-info">
+                    <span class="username" id="currentUsername"></span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
                 </div>
             </nav>
 
             <!-- Alert -->
             <div id="alertMessage" class="alert"></div>
 
-            <!-- Content Area -->
+            <!-- Content -->
             <div class="content">
-                <!-- Home Page (Semua Foto) -->
+                <!-- Home Page -->
                 <div id="homePage">
-                    <div class="page-header">
-                        <h2>📸 Semua Foto</h2>
-                    </div>
-                    <div id="galleryContainer" class="gallery-grid">
-                        <!-- Gallery will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- My Photos Page -->
-                <div id="myPhotosPage" style="display: none;">
-                    <div class="page-header">
-                        <h2>🖼️ Fotoku</h2>
-                    </div>
-                    <div id="myPhotosContainer" class="gallery-grid">
-                        <!-- My photos will be loaded here -->
-                    </div>
+                    <h2>📸 Gallery Foto</h2>
+                    <div id="galleryContainer" class="gallery-grid"></div>
                 </div>
 
                 <!-- Upload Page -->
                 <div id="uploadPage" style="display: none;">
-                    <div class="page-header">
-                        <h2>📤 Upload Foto Baru</h2>
-                    </div>
                     <div class="upload-form">
+                        <h3>📤 Upload Foto Baru</h3>
                         <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-                            <i>📁</i>
                             <p>Klik untuk pilih foto</p>
-                            <p style="font-size: 12px; color: #999;">Foto akan disimpan di folder img/ GitHub</p>
                             <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
                         </div>
-                        <img id="preview" class="image-preview" alt="Preview">
-                        <textarea id="caption" placeholder="Tulis caption untuk foto ini..."></textarea>
-                        <button class="btn" onclick="handleUpload()">Upload Foto</button>
+                        <img id="preview" class="image-preview">
+                        <textarea id="caption" placeholder="Tulis caption..."></textarea>
+                        <button class="btn" onclick="uploadPost()">Upload</button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Edit Modal -->
-        <div id="editModal" class="modal">
-            <div class="modal-content">
-                <h3>✏️ Edit Caption</h3>
-                <textarea id="editCaption" rows="4" placeholder="Edit caption..."></textarea>
-                <button class="btn" onclick="handleUpdate()">Simpan Perubahan</button>
-                <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration
-        const GITHUB_USERNAME = 'username-anda'; // Ganti dengan username GitHub Anda
-        const REPO_NAME = 'gallery-app'; // Ganti dengan nama repo Anda
-        const GITHUB_TOKEN = 'token_github_anda'; // Ganti dengan token GitHub Anda
-        
-        // Initialize database
+        // Supabase Configuration
+        const supabaseUrl = 'https://athsijudenxngliekkbm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
         let currentUser = null;
-        let currentEditId = null;
-        let allPosts = [];
-
-        // Load data dari localStorage
-        function initDatabase() {
-            if (!localStorage.getItem('users')) {
-                localStorage.setItem('users', JSON.stringify([]));
-            }
-            if (!localStorage.getItem('posts')) {
-                localStorage.setItem('posts', JSON.stringify([]));
-            }
-            loadPosts();
-        }
-
-        // Load posts dari localStorage
-        function loadPosts() {
-            allPosts = JSON.parse(localStorage.getItem('posts')) || [];
-        }
-
-        // Save posts ke localStorage
-        function savePosts() {
-            localStorage.setItem('posts', JSON.stringify(allPosts));
-        }
 
         // Auth Functions
         function showRegister() {
@@ -649,7 +512,8 @@
             document.getElementById('registerCard').style.display = 'none';
         }
 
-        function handleRegister() {
+        // Register
+        async function register() {
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
             const confirmPass = document.getElementById('regConfirmPassword').value;
@@ -664,31 +528,40 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users'));
-            
-            if (users.find(u => u.username === username)) {
-                showAlert('Username sudah digunakan!', 'error');
-                return;
+            try {
+                // Register ke Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: `${username}@gallery.app`,
+                    password: password,
+                    options: {
+                        data: { username: username }
+                    }
+                });
+
+                if (authError) throw authError;
+
+                // Simpan ke tabel users
+                const { error: dbError } = await supabase
+                    .from('users')
+                    .insert([{
+                        id: authData.user.id,
+                        username: username,
+                        email: `${username}@gallery.app`,
+                        full_name: username
+                    }]);
+
+                if (dbError) throw dbError;
+
+                showAlert('Registrasi berhasil! Silakan login.', 'success');
+                setTimeout(showLogin, 1500);
+
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
             }
-
-            users.push({
-                username: username,
-                password: password,
-                created_at: new Date().toISOString()
-            });
-
-            localStorage.setItem('users', JSON.stringify(users));
-            showAlert('Registrasi berhasil! Silakan login.', 'success');
-            
-            setTimeout(() => {
-                showLogin();
-                document.getElementById('regUsername').value = '';
-                document.getElementById('regPassword').value = '';
-                document.getElementById('regConfirmPassword').value = '';
-            }, 1500);
         }
 
-        function handleLogin() {
+        // Login
+        async function login() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
@@ -697,63 +570,60 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users'));
-            const user = users.find(u => u.username === username && u.password === password);
+            try {
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: `${username}@gallery.app`,
+                    password: password
+                });
 
-            if (user) {
-                currentUser = username;
+                if (authError) throw authError;
+
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', authData.user.id)
+                    .single();
+
+                if (userError) throw userError;
+
+                currentUser = userData;
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayUsername').textContent = username;
+                document.getElementById('currentUsername').textContent = userData.username;
                 
-                showAlert(`Selamat datang, ${username}!`, 'success');
+                showAlert('Login berhasil!', 'success');
                 showPage('home');
-                refreshGallery();
-                
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
-            } else {
-                showAlert('Username atau password salah!', 'error');
+                loadPosts();
+
+            } catch (error) {
+                showAlert('Login gagal: ' + error.message, 'error');
             }
         }
 
-        function handleLogout() {
+        // Logout
+        async function logout() {
+            await supabase.auth.signOut();
             currentUser = null;
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
-            showAlert('Anda telah logout', 'success');
         }
 
         // Navigation
         function showPage(page) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
             if (page === 'home') {
                 document.querySelectorAll('.nav-item')[0].classList.add('active');
                 document.getElementById('homePage').style.display = 'block';
-                document.getElementById('myPhotosPage').style.display = 'none';
                 document.getElementById('uploadPage').style.display = 'none';
-                refreshGallery();
-            } else if (page === 'myphotos') {
-                document.querySelectorAll('.nav-item')[2].classList.add('active');
-                document.getElementById('homePage').style.display = 'none';
-                document.getElementById('myPhotosPage').style.display = 'block';
-                document.getElementById('uploadPage').style.display = 'none';
-                showMyPhotos();
+                loadPosts();
             } else {
                 document.querySelectorAll('.nav-item')[1].classList.add('active');
                 document.getElementById('homePage').style.display = 'none';
-                document.getElementById('myPhotosPage').style.display = 'none';
                 document.getElementById('uploadPage').style.display = 'block';
-                
-                // Reset form upload
-                document.getElementById('fileInput').value = '';
-                document.getElementById('caption').value = '';
-                document.getElementById('preview').style.display = 'none';
             }
         }
 
-        // Image Preview
+        // Preview Image
         function previewImage(event) {
             const file = event.target.files[0];
             const preview = document.getElementById('preview');
@@ -768,358 +638,302 @@
             }
         }
 
-        // Generate filename untuk GitHub
-        function generateFileName() {
-            const timestamp = Date.now();
-            const random = Math.floor(Math.random() * 1000);
-            return `photo_${timestamp}_${random}.jpg`;
-        }
-
-        // Upload ke GitHub
-        async function uploadToGitHub(file, fileName) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = async function(e) {
-                    try {
-                        // Ambil base64 data
-                        const base64Data = e.target.result.split(',')[1];
-                        
-                        // Buat content untuk GitHub API
-                        const content = base64Data;
-                        
-                        // GitHub API URL
-                        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/img/${fileName}`;
-                        
-                        // Cek apakah file sudah ada
-                        const checkResponse = await fetch(url, {
-                            headers: {
-                                'Authorization': `token ${GITHUB_TOKEN}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        });
-                        
-                        let sha = null;
-                        if (checkResponse.ok) {
-                            const data = await checkResponse.json();
-                            sha = data.sha;
-                        }
-                        
-                        // Upload file
-                        const uploadResponse = await fetch(url, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `token ${GITHUB_TOKEN}`,
-                                'Accept': 'application/vnd.github.v3+json',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                message: `Upload foto ${fileName}`,
-                                content: content,
-                                sha: sha,
-                                branch: 'main'
-                            })
-                        });
-                        
-                        if (uploadResponse.ok) {
-                            const data = await uploadResponse.json();
-                            // Dapatkan raw URL dari GitHub
-                            const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/img/${fileName}`;
-                            resolve(rawUrl);
-                        } else {
-                            reject('Gagal upload ke GitHub');
-                        }
-                    } catch (error) {
-                        reject(error.message);
-                    }
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Handle Upload
-        async function handleUpload() {
+        // Upload Post
+        async function uploadPost() {
             const fileInput = document.getElementById('fileInput');
             const caption = document.getElementById('caption').value;
-            const preview = document.getElementById('preview');
 
             if (!fileInput.files[0]) {
-                showAlert('Pilih foto terlebih dahulu!', 'error');
+                showAlert('Pilih foto dulu!', 'error');
                 return;
             }
 
             if (!caption) {
-                showAlert('Tulis caption untuk foto!', 'error');
+                showAlert('Tulis caption!', 'error');
                 return;
             }
 
             showLoading(true);
 
             try {
-                const fileName = generateFileName();
-                const imageUrl = await uploadToGitHub(fileInput.files[0], fileName);
-                
-                const newPost = {
-                    id: Date.now(),
-                    username: currentUser,
-                    imageUrl: imageUrl,
-                    fileName: fileName,
-                    caption: caption,
-                    created_at: new Date().toLocaleString('id-ID')
-                };
+                const file = fileInput.files[0];
+                const fileName = `${Date.now()}_${file.name}`;
 
-                allPosts.push(newPost);
-                savePosts();
+                // Upload ke Storage
+                const { error: uploadError } = await supabase.storage
+                    .from('gallery')
+                    .upload(`photos/${fileName}`, file);
 
-                showAlert('Foto berhasil diupload ke GitHub!', 'success');
-                
-                // Reset form dan kembali ke home
-                setTimeout(() => {
-                    showPage('home');
-                }, 1500);
-                
+                if (uploadError) throw uploadError;
+
+                // Get Public URL
+                const { data: urlData } = supabase.storage
+                    .from('gallery')
+                    .getPublicUrl(`photos/${fileName}`);
+
+                // Save to database
+                const { error: postError } = await supabase
+                    .from('posts')
+                    .insert([{
+                        user_id: currentUser.id,
+                        image_url: urlData.publicUrl,
+                        image_filename: fileName,
+                        caption: caption
+                    }]);
+
+                if (postError) throw postError;
+
+                showAlert('Foto berhasil diupload!', 'success');
+                setTimeout(() => showPage('home'), 1500);
+
             } catch (error) {
-                showAlert('Gagal upload: ' + error, 'error');
+                showAlert('Gagal upload: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
         }
 
-        // Show loading
-        function showLoading(show) {
-            const loadingDiv = document.getElementById('loadingIndicator');
-            if (show) {
-                if (!loadingDiv) {
-                    const div = document.createElement('div');
-                    div.id = 'loadingIndicator';
-                    div.className = 'loading';
-                    div.innerHTML = '<div class="spinner"></div><p>Uploading ke GitHub...</p>';
-                    document.querySelector('.content').appendChild(div);
-                }
-            } else {
-                if (loadingDiv) {
-                    loadingDiv.remove();
-                }
-            }
-        }
-
-        // Refresh Gallery
-        function refreshGallery() {
-            const container = document.getElementById('galleryContainer');
-            
-            if (allPosts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i>📷</i>
-                        <h3>Belum ada foto</h3>
-                        <p>Upload foto pertamamu sekarang!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Urutkan dari yang terbaru
-            const sortedPosts = [...allPosts].sort((a, b) => b.id - a.id);
-
-            let html = '';
-            sortedPosts.forEach(post => {
-                html += `
-                    <div class="photo-card">
-                        <img src="${post.imageUrl}" class="photo-image" alt="Photo" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading'">
-                        <div class="photo-details">
-                            <div class="photo-header">
-                                <span class="photo-author">👤 ${post.username}</span>
-                                <span class="photo-date">${post.created_at}</span>
-                            </div>
-                            <p class="photo-caption">${post.caption}</p>
-                            ${post.username === currentUser ? `
-                                <div class="photo-actions">
-                                    <button class="edit-btn" onclick="openEditModal(${post.id})">✏️ Edit</button>
-                                    <button class="delete-btn" onclick="handleDelete(${post.id})">🗑️ Hapus</button>
-                                </div>
-                            ` : `
-                                <div class="photo-actions">
-                                    <button class="download-btn" onclick="downloadImage('${post.imageUrl}', '${post.fileName}')">📥 Download</button>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // Show My Photos
-        function showMyPhotos() {
-            const container = document.getElementById('myPhotosContainer');
-            const myPosts = allPosts.filter(post => post.username === currentUser);
-            
-            if (myPosts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i>🖼️</i>
-                        <h3>Kamu belum punya foto</h3>
-                        <p>Upload foto pertamamu sekarang!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Urutkan dari yang terbaru
-            const sortedPosts = [...myPosts].sort((a, b) => b.id - a.id);
-
-            let html = '';
-            sortedPosts.forEach(post => {
-                html += `
-                    <div class="photo-card">
-                        <img src="${post.imageUrl}" class="photo-image" alt="Photo" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading'">
-                        <div class="photo-details">
-                            <div class="photo-header">
-                                <span class="photo-author">👤 ${post.username}</span>
-                                <span class="photo-date">${post.created_at}</span>
-                            </div>
-                            <p class="photo-caption">${post.caption}</p>
-                            <div class="photo-actions">
-                                <button class="edit-btn" onclick="openEditModal(${post.id})">✏️ Edit</button>
-                                <button class="delete-btn" onclick="handleDelete(${post.id})">🗑️ Hapus</button>
-                                <button class="download-btn" onclick="downloadImage('${post.imageUrl}', '${post.fileName}')">📥 Download</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // Download Image
-        function downloadImage(url, filename) {
-            fetch(url)
-                .then(response => response.blob())
-                .then(blob => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = filename;
-                    link.click();
-                })
-                .catch(() => {
-                    showAlert('Gagal download foto', 'error');
-                });
-        }
-
-        // Delete from GitHub
-        async function deleteFromGitHub(fileName) {
+        // Load Posts
+        async function loadPosts() {
             try {
-                const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/img/${fileName}`;
+                const { data: posts, error } = await supabase
+                    .from('posts')
+                    .select(`
+                        *,
+                        users:user_id (
+                            username,
+                            full_name,
+                            avatar_url
+                        )
+                    `)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const container = document.getElementById('galleryContainer');
                 
-                // Dapatkan SHA file
-                const getResponse = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (getResponse.ok) {
-                    const data = await getResponse.json();
-                    
-                    // Delete file
-                    await fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: `Hapus foto ${fileName}`,
-                            sha: data.sha,
-                            branch: 'main'
-                        })
-                    });
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Belum ada foto</div>';
+                    return;
                 }
+
+                let html = '';
+                for (let post of posts) {
+                    // Check if user liked this post
+                    const { data: likeData } = await supabase
+                        .from('likes')
+                        .select('*')
+                        .eq('post_id', post.id)
+                        .eq('user_id', currentUser?.id)
+                        .maybeSingle();
+
+                    // Get comments for this post
+                    const { data: comments } = await supabase
+                        .from('comments')
+                        .select(`
+                            *,
+                            users:user_id (username)
+                        `)
+                        .eq('post_id', post.id)
+                        .order('created_at', { ascending: true });
+
+                    html += `
+                        <div class="photo-card" id="post-${post.id}">
+                            <img src="${post.image_url}" class="photo-image">
+                            <div class="photo-info">
+                                <div class="photo-header">
+                                    <span class="photo-author">👤 ${post.users.username}</span>
+                                    <span class="photo-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <p class="photo-caption">${post.caption}</p>
+                                <div class="photo-stats">
+                                    <span>❤️ ${post.likes_count} likes</span>
+                                    <span>💬 ${post.comments_count} comments</span>
+                                </div>
+                                <div class="photo-actions">
+                                    <button class="like-btn ${likeData ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                                        ${likeData ? '❤️ Unlike' : '🤍 Like'}
+                                    </button>
+                                    ${post.user_id === currentUser?.id ? 
+                                        `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : ''
+                                    }
+                                </div>
+                                
+                                <!-- Comments Section -->
+                                <div class="comments-section">
+                                    ${comments?.map(comment => `
+                                        <div class="comment">
+                                            <span class="comment-author">${comment.users.username}</span>
+                                            <span>${comment.content}</span>
+                                        </div>
+                                    `).join('')}
+                                    
+                                    <div class="comment-input">
+                                        <input type="text" id="comment-${post.id}" placeholder="Tulis komentar...">
+                                        <button onclick="addComment(${post.id})">Kirim</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+
             } catch (error) {
-                console.error('Gagal hapus dari GitHub:', error);
+                showAlert('Gagal load posts: ' + error.message, 'error');
             }
         }
 
-        // Handle Delete
-        async function handleDelete(id) {
-            if (confirm('Yakin ingin menghapus foto ini?')) {
-                const post = allPosts.find(p => p.id === id);
-                
-                if (post && post.username === currentUser) {
-                    // Hapus dari GitHub
-                    await deleteFromGitHub(post.fileName);
+        // Toggle Like
+        async function toggleLike(postId) {
+            if (!currentUser) return;
+
+            try {
+                const { data: existingLike } = await supabase
+                    .from('likes')
+                    .select('*')
+                    .eq('post_id', postId)
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+
+                if (existingLike) {
+                    // Unlike
+                    await supabase
+                        .from('likes')
+                        .delete()
+                        .eq('post_id', postId)
+                        .eq('user_id', currentUser.id);
                     
-                    // Hapus dari array
-                    allPosts = allPosts.filter(p => p.id !== id);
-                    savePosts();
+                    await supabase.rpc('decrement_likes', { post_id: postId });
+                } else {
+                    // Like
+                    await supabase
+                        .from('likes')
+                        .insert([{ post_id: postId, user_id: currentUser.id }]);
                     
-                    showAlert('Foto berhasil dihapus!', 'success');
-                    refreshGallery();
-                    if (document.getElementById('myPhotosPage').style.display === 'block') {
-                        showMyPhotos();
-                    }
+                    await supabase.rpc('increment_likes', { post_id: postId });
                 }
+
+                loadPosts();
+
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
             }
         }
 
-        // Edit Functions
-        function openEditModal(id) {
-            const post = allPosts.find(p => p.id === id);
-            
-            if (post && post.username === currentUser) {
-                currentEditId = id;
-                document.getElementById('editCaption').value = post.caption;
-                document.getElementById('editModal').style.display = 'flex';
+        // Add Comment
+        async function addComment(postId) {
+            if (!currentUser) return;
+
+            const input = document.getElementById(`comment-${postId}`);
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            try {
+                await supabase
+                    .from('comments')
+                    .insert([{
+                        post_id: postId,
+                        user_id: currentUser.id,
+                        content: content
+                    }]);
+
+                // Update comments count
+                await supabase
+                    .from('posts')
+                    .update({ comments_count: supabase.rpc('increment') })
+                    .eq('id', postId);
+
+                input.value = '';
+                loadPosts();
+
+            } catch (error) {
+                showAlert('Gagal comment: ' + error.message, 'error');
             }
         }
 
-        function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-            currentEditId = null;
-        }
+        // Delete Post
+        async function deletePost(postId) {
+            if (!confirm('Yakin ingin menghapus?')) return;
 
-        function handleUpdate() {
-            const newCaption = document.getElementById('editCaption').value;
-            
-            if (!newCaption) {
-                showAlert('Caption tidak boleh kosong!', 'error');
-                return;
-            }
+            try {
+                // Get post data to delete image from storage
+                const { data: post } = await supabase
+                    .from('posts')
+                    .select('image_filename')
+                    .eq('id', postId)
+                    .single();
 
-            const index = allPosts.findIndex(p => p.id === currentEditId);
-            
-            if (index !== -1 && allPosts[index].username === currentUser) {
-                allPosts[index].caption = newCaption;
-                savePosts();
-                
-                showAlert('Caption berhasil diupdate!', 'success');
-                closeModal();
-                refreshGallery();
-                if (document.getElementById('myPhotosPage').style.display === 'block') {
-                    showMyPhotos();
+                // Delete from storage
+                if (post?.image_filename) {
+                    await supabase.storage
+                        .from('gallery')
+                        .remove([`photos/${post.image_filename}`]);
                 }
+
+                // Delete from database
+                await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId)
+                    .eq('user_id', currentUser.id);
+
+                showAlert('Post berhasil dihapus!', 'success');
+                loadPosts();
+
+            } catch (error) {
+                showAlert('Gagal hapus: ' + error.message, 'error');
             }
         }
 
-        // Alert Function
+        // Helper Functions
         function showAlert(message, type) {
             const alert = document.getElementById('alertMessage');
             alert.textContent = message;
             alert.className = `alert ${type}`;
             alert.style.display = 'block';
-            
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
+            setTimeout(() => alert.style.display = 'none', 3000);
         }
 
-        // Initialize app
-        initDatabase();
+        function showLoading(show) {
+            const loading = document.getElementById('loadingIndicator');
+            if (show) {
+                if (!loading) {
+                    const div = document.createElement('div');
+                    div.id = 'loadingIndicator';
+                    div.className = 'loading';
+                    div.innerHTML = '<div class="spinner"></div><p>Loading...</p>';
+                    document.querySelector('.content').appendChild(div);
+                }
+            } else {
+                if (loading) loading.remove();
+            }
+        }
+
+        // Check session on load
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (userData) {
+                    currentUser = userData;
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('currentUsername').textContent = userData.username;
+                    showPage('home');
+                }
+            }
+        }
+
+        // Initialize
+        checkSession();
     </script>
 </body>
 </html>
