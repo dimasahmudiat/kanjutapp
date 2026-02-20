@@ -4,7 +4,6 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -12,34 +11,37 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// ========== KONEKSI MYSQL ==========
-const db = mysql.createConnection({
+// ========== BUAT POOL KONEKSI MYSQL (lebih stabil) ==========
+const pool = mysql.createPool({
+    connectionLimit: 10,
     host: process.env.DB_HOST || 'i3wu4s.h.filess.io',
     user: process.env.DB_USER || 'dimas_luckytower',
     password: process.env.DB_PASSWORD || 'dimasahm12',
     database: process.env.DB_NAME || 'dimas_luckytower',
-    port: process.env.DB_PORT || 61001
+    port: process.env.DB_PORT || 61001,
+    multipleStatements: true
 });
 
-db.connect((err) => {
+// Test koneksi pool
+pool.getConnection((err, connection) => {
     if (err) {
-        console.error('❌ MySQL connection failed:', err);
+        console.error('❌ Gagal mendapatkan koneksi dari pool:', err);
     } else {
-        console.log('✅ Connected to MySQL database!');
+        console.log('✅ Pool MySQL siap digunakan');
+        connection.release();
     }
 });
 
-// ========== MULTER UNTUK UPLOAD (Base64) ==========
-// Karena Vercel tidak menyimpan file, kita akan simpan gambar sebagai base64 di database
+// ========== MULTER (Upload file) ==========
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
-            cb(new Error('File harus gambar!'), false);
+            cb(new Error('File harus gambar'), false);
         }
     }
 });
@@ -61,8 +63,11 @@ function verifyToken(req, res, next) {
 
 // Test koneksi
 app.get('/api/test', (req, res) => {
-    db.query('SELECT 1+1 AS result', (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: err.message });
+    pool.query('SELECT 1+1 AS result', (err, results) => {
+        if (err) {
+            console.error('Test query error:', err);
+            return res.status(500).json({ success: false, message: err.message });
+        }
         res.json({ success: true, result: results[0].result });
     });
 });
@@ -75,23 +80,26 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        // Cek user sudah ada
-        db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email], async (err, results) => {
-            if (err) return res.status(500).json({ success: false, message: err.message });
-            if (results.length > 0) {
-                return res.status(400).json({ success: false, message: 'Username atau email sudah terdaftar' });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-            db.query(
-                'INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)',
-                [username, email, hashedPassword, username],
-                (err, result) => {
-                    if (err) return res.status(500).json({ success: false, message: err.message });
-                    res.json({ success: true, message: 'Registrasi berhasil' });
+        pool.query(
+            'SELECT * FROM users WHERE username = ? OR email = ?',
+            [username, email],
+            async (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: err.message });
+                if (results.length > 0) {
+                    return res.status(400).json({ success: false, message: 'Username atau email sudah terdaftar' });
                 }
-            );
-        });
+
+                const hashedPassword = await bcrypt.hash(password, 10);
+                pool.query(
+                    'INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)',
+                    [username, email, hashedPassword, username],
+                    (err, result) => {
+                        if (err) return res.status(500).json({ success: false, message: err.message });
+                        res.json({ success: true, message: 'Registrasi berhasil' });
+                    }
+                );
+            }
+        );
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -104,7 +112,7 @@ app.post('/api/login', (req, res) => {
         return res.status(400).json({ success: false, message: 'Username dan password harus diisi' });
     }
 
-    db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+    pool.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (results.length === 0) {
             return res.status(401).json({ success: false, message: 'Username tidak ditemukan' });
@@ -135,21 +143,16 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Upload foto (dengan base64)
+// Upload foto
 app.post('/api/upload', verifyToken, upload.single('image'), (req, res) => {
     const { caption } = req.body;
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Pilih foto' });
-    }
-    if (!caption) {
-        return res.status(400).json({ success: false, message: 'Tulis caption' });
-    }
+    if (!req.file) return res.status(400).json({ success: false, message: 'Pilih foto' });
+    if (!caption) return res.status(400).json({ success: false, message: 'Tulis caption' });
 
-    // Konversi file ke base64
     const imageBase64 = req.file.buffer.toString('base64');
     const imageUrl = `data:${req.file.mimetype};base64,${imageBase64}`;
 
-    db.query(
+    pool.query(
         'INSERT INTO posts (user_id, image_url, image_filename, caption) VALUES (?, ?, ?, ?)',
         [req.userId, imageUrl, req.file.originalname, caption],
         (err, result) => {
@@ -169,13 +172,13 @@ app.get('/api/posts', (req, res) => {
         JOIN users u ON p.user_id = u.id
         ORDER BY p.created_at DESC
     `;
-    db.query(query, (err, results) => {
+    pool.query(query, (err, results) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         res.json({ success: true, posts: results });
     });
 });
 
-// Get posts by user
+// Get user posts
 app.get('/api/posts/user/:userId', (req, res) => {
     const query = `
         SELECT p.*, u.username,
@@ -186,7 +189,7 @@ app.get('/api/posts/user/:userId', (req, res) => {
         WHERE p.user_id = ?
         ORDER BY p.created_at DESC
     `;
-    db.query(query, [req.params.userId], (err, results) => {
+    pool.query(query, [req.params.userId], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         res.json({ success: true, posts: results });
     });
@@ -195,21 +198,21 @@ app.get('/api/posts/user/:userId', (req, res) => {
 // Like/unlike
 app.post('/api/like/:postId', verifyToken, (req, res) => {
     const postId = req.params.postId;
-    db.query('SELECT * FROM likes WHERE user_id = ? AND post_id = ?', [req.userId, postId], (err, results) => {
+    pool.query('SELECT * FROM likes WHERE user_id = ? AND post_id = ?', [req.userId, postId], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
 
         if (results.length > 0) {
             // Unlike
-            db.query('DELETE FROM likes WHERE user_id = ? AND post_id = ?', [req.userId, postId], (err) => {
+            pool.query('DELETE FROM likes WHERE user_id = ? AND post_id = ?', [req.userId, postId], (err) => {
                 if (err) return res.status(500).json({ success: false, message: err.message });
-                db.query('UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?', [postId]);
+                pool.query('UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?', [postId]);
                 res.json({ success: true, liked: false });
             });
         } else {
             // Like
-            db.query('INSERT INTO likes (user_id, post_id) VALUES (?, ?)', [req.userId, postId], (err) => {
+            pool.query('INSERT INTO likes (user_id, post_id) VALUES (?, ?)', [req.userId, postId], (err) => {
                 if (err) return res.status(500).json({ success: false, message: err.message });
-                db.query('UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?', [postId]);
+                pool.query('UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?', [postId]);
                 res.json({ success: true, liked: true });
             });
         }
@@ -218,7 +221,7 @@ app.post('/api/like/:postId', verifyToken, (req, res) => {
 
 // Delete post
 app.delete('/api/post/:postId', verifyToken, (req, res) => {
-    db.query('DELETE FROM posts WHERE id = ? AND user_id = ?', [req.params.postId, req.userId], (err, result) => {
+    pool.query('DELETE FROM posts WHERE id = ? AND user_id = ?', [req.params.postId, req.userId], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (result.affectedRows === 0) {
             return res.status(403).json({ success: false, message: 'Tidak berhak menghapus' });
@@ -230,5 +233,5 @@ app.delete('/api/post/:postId', verifyToken, (req, res) => {
 // ========== JALANKAN SERVER ==========
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`✅ Server berjalan di port ${PORT}`);
 });
