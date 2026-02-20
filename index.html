@@ -1,216 +1,39 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Koneksi Supabase</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1 { color: #333; }
-        .success { color: #27ae60; font-weight: bold; }
-        .error { color: #e74c3c; font-weight: bold; }
-        .info { color: #3498db; }
-        pre {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 12px;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        .status-box {
-            border-left: 4px solid;
-            padding: 15px;
-            margin: 20px 0;
-            background: #f8f9fa;
-        }
-    </style>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Test Koneksi</title>
 </head>
 <body>
-    <div class="card">
-        <h1>🔍 Test Koneksi Supabase</h1>
-        
-        <div class="status-box" style="border-color: #3498db;">
-            <h3>📋 Konfigurasi</h3>
-            <p><strong>URL:</strong> <span id="displayUrl"></span></p>
-            <p><strong>Anon Key:</strong> <span id="displayKey"></span> (hidden untuk security)</p>
-        </div>
-
-        <button onclick="testConnection()">🔄 Test Koneksi</button>
-        <button onclick="testAuth()">👤 Test Auth</button>
-        <button onclick="testStorage()">📦 Test Storage</button>
-        
-        <div id="result" style="margin-top: 20px;"></div>
-    </div>
+    <h1>Test Koneksi Supabase</h1>
+    <div id="status">Loading...</div>
 
     <script>
-        // =====================================================
-        // SUPABASE CONFIGURATION - PASTIKAN INI SESUAI
-        // =====================================================
-        const SUPABASE_URL = 'https://athsijudenxngliekkbm.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
+    // Test koneksi dengan alert
+    alert('Mencoba koneksi ke database...');
 
-        // Tampilkan konfigurasi
-        document.getElementById('displayUrl').textContent = SUPABASE_URL;
-        document.getElementById('displayKey').textContent = SUPABASE_ANON_KEY.substring(0, 20) + '...';
-
-        // Inisialisasi Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Fungsi untuk menampilkan hasil
-        function showResult(title, data, isSuccess = true) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `
-                <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px;">
-                    <h3 style="color: ${isSuccess ? '#27ae60' : '#e74c3c'}; margin-bottom: 15px;">
-                        ${isSuccess ? '✅ ' : '❌ '} ${title}
-                    </h3>
-                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px;">${JSON.stringify(data, null, 2)}</pre>
-                </div>
-            `;
+    fetch('https://athsijudenxngliekkbm.supabase.co/rest/v1/', {
+        headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY'
         }
-
-        // Test koneksi database
-        async function testConnection() {
-            try {
-                showResult('Mencoba koneksi ke database...', { status: 'loading...' });
-                
-                // Coba koneksi ke tabel users
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('count', { count: 'exact', head: true });
-
-                if (error) {
-                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                        showResult('Koneksi Berhasil Tapi Tabel Belum Ada', {
-                            status: '✅ Koneksi ke Supabase berhasil',
-                            warning: '⚠️ Tabel "users" belum dibuat',
-                            error: error.message,
-                            solusi: 'Jalankan SQL untuk membuat tabel di Supabase SQL Editor'
-                        }, false);
-                    } else {
-                        showResult('Koneksi Gagal', {
-                            status: '❌ Tidak dapat terhubung ke database',
-                            error: error.message,
-                            solusi: 'Periksa URL dan API Key'
-                        }, false);
-                    }
-                    return;
-                }
-
-                showResult('Koneksi Database Berhasil!', {
-                    status: '✅ Terhubung ke Supabase',
-                    message: 'Database siap digunakan',
-                    data: data
-                }, true);
-
-            } catch (error) {
-                showResult('Error Koneksi', {
-                    status: '❌ Error',
-                    error: error.message,
-                    solusi: 'Periksa koneksi internet dan konfigurasi'
-                }, false);
-            }
+    })
+    .then(res => {
+        document.getElementById('status').innerHTML = 'Status: ' + res.status;
+        if (res.ok) {
+            alert('✅ SUKSES! Koneksi database berhasil');
+            return res.json();
+        } else {
+            alert('❌ GAGAL! Status: ' + res.status);
+            throw new Error('HTTP Error ' + res.status);
         }
-
-        // Test Auth
-        async function testAuth() {
-            try {
-                showResult('Mencoba test Auth...', { status: 'loading...' });
-
-                // Coba test signup dengan email dummy
-                const testEmail = `test${Date.now()}@test.com`;
-                const testPassword = 'password123';
-
-                const { data, error } = await supabase.auth.signUp({
-                    email: testEmail,
-                    password: testPassword
-                });
-
-                if (error) {
-                    showResult('Auth Gagal', {
-                        status: '❌ Tidak dapat melakukan registrasi',
-                        error: error.message,
-                        test_email: testEmail
-                    }, false);
-                    return;
-                }
-
-                showResult('Auth Berhasil!', {
-                    status: '✅ Auth service berfungsi',
-                    message: 'Dapat melakukan registrasi',
-                    user_id: data.user?.id,
-                    email: data.user?.email
-                }, true);
-
-            } catch (error) {
-                showResult('Error Auth', {
-                    status: '❌ Error',
-                    error: error.message
-                }, false);
-            }
-        }
-
-        // Test Storage
-        async function testStorage() {
-            try {
-                showResult('Mencoba test Storage...', { status: 'loading...' });
-
-                // Coba list buckets
-                const { data, error } = await supabase.storage.listBuckets();
-
-                if (error) {
-                    showResult('Storage Gagal', {
-                        status: '❌ Tidak dapat mengakses storage',
-                        error: error.message,
-                        solusi: 'Pastikan bucket storage sudah dibuat'
-                    }, false);
-                    return;
-                }
-
-                showResult('Storage Berhasil!', {
-                    status: '✅ Storage service berfungsi',
-                    buckets: data.map(b => ({ name: b.name, public: b.public }))
-                }, true);
-
-            } catch (error) {
-                showResult('Error Storage', {
-                    status: '❌ Error',
-                    error: error.message
-                }, false);
-            }
-        }
-
-        // Auto test saat halaman dimuat
-        window.onload = function() {
-            setTimeout(testConnection, 1000);
-        };
+    })
+    .then(data => {
+        console.log('Data:', data);
+        alert('Data diterima: ' + JSON.stringify(data).substring(0, 100));
+    })
+    .catch(err => {
+        alert('❌ ERROR: ' + err.message);
+        document.getElementById('status').innerHTML = 'Error: ' + err.message;
+    });
     </script>
 </body>
 </html>
