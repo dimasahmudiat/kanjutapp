@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - Fix Bug</title>
+    <title>GalleryApp - Testing Mode</title>
     
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -47,6 +47,17 @@
             margin-bottom: 30px;
             color: #333;
         }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .info-box strong {
+            color: #2196f3;
+        }
         .input-group {
             margin-bottom: 20px;
         }
@@ -76,6 +87,9 @@
         }
         .btn-secondary {
             background: #95a5a6;
+        }
+        .btn-test {
+            background: #27ae60;
         }
         .auth-link {
             text-align: center;
@@ -229,6 +243,15 @@
             color: #999;
             grid-column: 1/-1;
         }
+        .test-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -236,16 +259,26 @@
         <!-- Login Card -->
         <div id="authContainer" class="auth-container">
             <div id="loginCard" class="auth-card">
-                <h2>📸 GalleryApp</h2>
+                <h2>📸 GalleryApp <span class="test-badge">TEST MODE</span></h2>
+                
+                <!-- Info Testing -->
+                <div class="info-box">
+                    <strong>🔑 Data Testing:</strong><br>
+                    Username: <strong>123</strong><br>
+                    Password: <strong>123</strong><br>
+                    <small>(Klik tombol hijau untuk auto-fill)</small>
+                </div>
+                
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="loginUsername" placeholder="Username">
+                    <input type="text" id="loginUsername" placeholder="Username" value="123">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Password">
+                    <input type="password" id="loginPassword" placeholder="Password" value="123">
                 </div>
                 <button class="btn" id="loginBtn">Login</button>
+                <button class="btn btn-test" id="testLoginBtn">🔑 Login Test (123/123)</button>
                 <div class="auth-link">
                     Belum punya akun? <a href="#" id="showRegisterBtn">Daftar</a>
                 </div>
@@ -254,6 +287,11 @@
             <!-- Register Card -->
             <div id="registerCard" class="auth-card" style="display: none;">
                 <h2>📝 Daftar</h2>
+                <div class="info-box">
+                    <strong>📝 Untuk testing cepat:</strong><br>
+                    Gunakan username: test123<br>
+                    Password: test123
+                </div>
                 <div class="input-group">
                     <label>Username</label>
                     <input type="text" id="regUsername" placeholder="Username">
@@ -335,11 +373,10 @@
         // Global variables
         let currentUser = null;
 
-        // ================== CEK KONEKSI SAAT LOAD ==================
+        // ================== CEK KONEKSI ==================
         window.addEventListener('load', async function() {
             console.log('✅ Halaman dimuat!');
             
-            // Test SweetAlert
             Swal.fire({
                 title: '📸 GalleryApp',
                 text: 'Mengecek koneksi database...',
@@ -348,8 +385,8 @@
                 showConfirmButton: false
             });
 
-            // Test koneksi ke Supabase
             try {
+                // Test koneksi
                 const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
                 
                 if (error) {
@@ -357,42 +394,8 @@
                         Swal.fire({
                             icon: 'warning',
                             title: '⚠️ Tabel Belum Ada',
-                            text: 'Koneksi database berhasil, tapi tabel belum dibuat. Jalankan SQL di Supabase!',
-                            confirmButtonText: 'Lihat SQL'
-                        }).then(() => {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'SQL untuk membuat tabel',
-                                html: `<pre style="text-align: left; background: #f5f5f5; padding: 10px;">
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username TEXT UNIQUE NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    full_name TEXT,
-    avatar_url TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE posts (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
-    image_filename TEXT,
-    caption TEXT,
-    likes_count INT DEFAULT 0,
-    comments_count INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE likes (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    post_id BIGINT REFERENCES posts(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(user_id, post_id)
-);
-                                </pre>`
-                            });
+                            text: 'Koneksi database berhasil, tapi tabel belum dibuat.',
+                            confirmButtonText: 'OK'
                         });
                     } else {
                         Swal.fire({
@@ -422,7 +425,58 @@ CREATE TABLE likes (
             checkSession();
         });
 
-        // ================== AUTH ==================
+        // ================== FUNGSI UNTUK MEMBUAT USER TEST ==================
+        async function createTestUser() {
+            try {
+                // Cek apakah user 123 sudah ada
+                const { data: existingUser } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', '123')
+                    .maybeSingle();
+
+                if (existingUser) {
+                    console.log('User test sudah ada');
+                    return;
+                }
+
+                // Buat user test di Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: 'test123@gmail.com',
+                    password: '123',
+                    options: {
+                        data: { username: '123' }
+                    }
+                });
+
+                if (authError) {
+                    console.log('Auth error:', authError.message);
+                    return;
+                }
+
+                // Simpan ke tabel users
+                const { error: dbError } = await supabase.from('users').insert([{
+                    id: authData.user.id,
+                    username: '123',
+                    email: 'test123@gmail.com',
+                    full_name: 'Test User'
+                }]);
+
+                if (dbError) {
+                    console.log('DB error:', dbError.message);
+                } else {
+                    console.log('User test berhasil dibuat!');
+                }
+
+            } catch (err) {
+                console.log('Error:', err);
+            }
+        }
+
+        // Panggil fungsi untuk membuat user test
+        createTestUser();
+
+        // ================== LOGIN FUNCTIONS ==================
         document.getElementById('showRegisterBtn').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('loginCard').style.display = 'none';
@@ -432,6 +486,132 @@ CREATE TABLE likes (
         document.getElementById('backToLoginBtn').addEventListener('click', function() {
             document.getElementById('loginCard').style.display = 'block';
             document.getElementById('registerCard').style.display = 'none';
+        });
+
+        // Login dengan data 123
+        async function loginWithTestData() {
+            try {
+                Swal.fire({ title: 'Login...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // Cari user dengan username 123
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', '123')
+                    .maybeSingle();
+
+                if (!userData) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ User Test Belum Ada',
+                        text: 'Membuat user test dulu...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Buat user test dulu
+                    await createTestUser();
+                    
+                    // Coba login lagi
+                    setTimeout(() => {
+                        loginWithTestData();
+                    }, 2000);
+                    return;
+                }
+
+                // Login dengan email dari database
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: userData.email,
+                    password: '123'
+                });
+
+                if (authError) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Login Gagal',
+                        text: 'Password salah atau user belum terdaftar'
+                    });
+                    return;
+                }
+
+                currentUser = userData;
+                
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('displayUsername').textContent = userData.username;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Login Berhasil!',
+                    text: `Selamat datang ${userData.username}`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                
+                loadPosts('all');
+
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: err.message
+                });
+            }
+        }
+
+        // Login biasa
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                Swal.fire('⚠️', 'Username dan password harus diisi!', 'warning');
+                return;
+            }
+
+            try {
+                Swal.fire({ title: 'Login...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .maybeSingle();
+
+                if (!userData) {
+                    Swal.fire('❌', 'Username tidak ditemukan!', 'error');
+                    return;
+                }
+
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: userData.email,
+                    password: password
+                });
+
+                if (authError) {
+                    Swal.fire('❌', 'Password salah!', 'error');
+                    return;
+                }
+
+                currentUser = userData;
+                
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('displayUsername').textContent = userData.username;
+                
+                Swal.fire('✅', `Selamat datang ${userData.username}`, 'success');
+                loadPosts('all');
+
+            } catch (err) {
+                Swal.fire('❌', err.message, 'error');
+            }
+        });
+
+        // Tombol test login
+        document.getElementById('testLoginBtn').addEventListener('click', function() {
+            document.getElementById('loginUsername').value = '123';
+            document.getElementById('loginPassword').value = '123';
+            loginWithTestData();
         });
 
         // Register
@@ -454,7 +634,6 @@ CREATE TABLE likes (
             try {
                 Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-                // Register ke Supabase Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
                     password: password,
@@ -463,7 +642,6 @@ CREATE TABLE likes (
 
                 if (authError) throw authError;
 
-                // Simpan ke tabel users
                 const { error: dbError } = await supabase.from('users').insert([{
                     id: authData.user.id,
                     username: username,
@@ -473,77 +651,15 @@ CREATE TABLE likes (
 
                 if (dbError) throw dbError;
 
-                Swal.fire('✅ Berhasil!', 'Registrasi sukses, silakan login.', 'success');
+                Swal.fire('✅', 'Registrasi berhasil! Silakan login.', 'success');
                 
-                // Reset form
-                document.getElementById('regUsername').value = '';
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regPassword').value = '';
-                document.getElementById('regConfirmPassword').value = '';
-                
-                // Balik ke login
                 setTimeout(() => {
                     document.getElementById('loginCard').style.display = 'block';
                     document.getElementById('registerCard').style.display = 'none';
                 }, 2000);
 
             } catch (err) {
-                Swal.fire('❌ Gagal', err.message, 'error');
-            }
-        });
-
-        // Login
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                Swal.fire('⚠️', 'Username dan password harus diisi!', 'warning');
-                return;
-            }
-
-            try {
-                Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                // Cari email dari username
-                const { data: userData, error: userError } = await supabase
-                    .from('users')
-                    .select('email')
-                    .eq('username', username)
-                    .single();
-
-                if (userError || !userData) throw new Error('Username tidak ditemukan');
-
-                // Login
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                    email: userData.email,
-                    password: password
-                });
-
-                if (authError) throw new Error('Password salah');
-
-                // Ambil data user lengkap
-                const { data: fullUser, error: fullError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', authData.user.id)
-                    .single();
-
-                if (fullError) throw fullError;
-
-                currentUser = fullUser;
-                
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayUsername').textContent = fullUser.username;
-                
-                Swal.fire('✅ Sukses!', `Selamat datang ${fullUser.username}`, 'success');
-                
-                // Load posts
-                loadPosts('all');
-
-            } catch (err) {
-                Swal.fire('❌ Gagal', err.message, 'error');
+                Swal.fire('❌', err.message, 'error');
             }
         });
 
@@ -621,7 +737,6 @@ CREATE TABLE likes (
             try {
                 Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-                // Upload ke storage
                 const fileName = `${Date.now()}_${file.name}`;
                 const { error: uploadError } = await supabase.storage
                     .from('gallery')
@@ -629,10 +744,8 @@ CREATE TABLE likes (
 
                 if (uploadError) throw uploadError;
 
-                // Get URL
                 const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(`photos/${fileName}`);
 
-                // Simpan ke database
                 const { error: postError } = await supabase.from('posts').insert([{
                     user_id: currentUser.id,
                     image_url: urlData.publicUrl,
@@ -644,18 +757,16 @@ CREATE TABLE likes (
 
                 Swal.fire('✅', 'Foto berhasil diupload!', 'success');
                 
-                // Reset form
                 document.getElementById('fileInput').value = '';
                 document.getElementById('caption').value = '';
                 document.getElementById('preview').style.display = 'none';
                 
-                // Kembali ke home
                 setTimeout(() => {
                     document.getElementById('homeNav').click();
                 }, 1500);
 
             } catch (err) {
-                Swal.fire('❌ Gagal', err.message, 'error');
+                Swal.fire('❌', err.message, 'error');
             }
         });
 
@@ -686,7 +797,6 @@ CREATE TABLE likes (
 
                 let html = '';
                 for (let post of posts) {
-                    // Cek like
                     let isLiked = false;
                     if (currentUser) {
                         const { data: likeData } = await supabase
@@ -727,11 +837,10 @@ CREATE TABLE likes (
 
             } catch (err) {
                 console.error('Error loading posts:', err);
-                document.getElementById('galleryContainer').innerHTML = '<div class="empty-state">Error loading posts</div>';
             }
         }
 
-        // ================== LIKE FUNCTIONS ==================
+        // ================== LIKE & DELETE ==================
         window.toggleLike = async function(postId) {
             if (!currentUser) {
                 Swal.fire('⚠️', 'Login dulu!', 'warning');
@@ -748,13 +857,10 @@ CREATE TABLE likes (
 
                 if (existing) {
                     await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-                    await supabase.rpc('decrement_likes', { post_id: postId });
                 } else {
                     await supabase.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
-                    await supabase.rpc('increment_likes', { post_id: postId });
                 }
 
-                // Reload posts
                 const activeNav = document.querySelector('.nav-item.active').id;
                 if (activeNav === 'homeNav') loadPosts('all');
                 else if (activeNav === 'myPhotosNav') loadPosts('my');
@@ -794,23 +900,6 @@ CREATE TABLE likes (
                 }
             }
         }
-
-        // SQL Functions (jalankan di Supabase)
-        /*
-        CREATE OR REPLACE FUNCTION increment_likes(post_id BIGINT)
-        RETURNS void AS $$
-        BEGIN
-            UPDATE posts SET likes_count = likes_count + 1 WHERE id = post_id;
-        END;
-        $$ LANGUAGE plpgsql;
-
-        CREATE OR REPLACE FUNCTION decrement_likes(post_id BIGINT)
-        RETURNS void AS $$
-        BEGIN
-            UPDATE posts SET likes_count = likes_count - 1 WHERE id = post_id;
-        END;
-        $$ LANGUAGE plpgsql;
-        */
     </script>
 </body>
 </html>
