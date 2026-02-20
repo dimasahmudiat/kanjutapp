@@ -511,11 +511,12 @@
                 <h2>📝 Daftar Akun Baru</h2>
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="regUsername" placeholder="Pilih username">
+                    <input type="text" id="regUsername" placeholder="Pilih username (min 3 karakter)">
                 </div>
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" id="regEmail" placeholder="Masukkan email">
+                    <input type="email" id="regEmail" placeholder="Masukkan email valid (contoh: nama@gmail.com)">
+                    <small style="color: #666; display: block; margin-top: 5px;">Gunakan email real untuk verifikasi</small>
                 </div>
                 <div class="input-group">
                     <label>Password</label>
@@ -587,15 +588,13 @@
 
     <script>
         // =====================================================
-        // SUPABASE CONFIGURATION
+        // SUPABASE CONFIGURATION - PASTIKAN INI BENAR
         // =====================================================
-        const SUPABASE_CONFIG = {
-            url: 'https://athsijudenxngliekkbm.supabase.co',
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY'
-        };
+        const SUPABASE_URL = 'https://athsijudenxngliekkbm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
 
-        // Initialize Supabase client
-        const supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        // Inisialisasi Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Global variables
         let currentUser = null;
@@ -616,41 +615,33 @@
                     }
                 });
 
-                // Coba koneksi ke database dengan timeout
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Timeout')), 10000)
-                );
-
-                const connectionPromise = supabase
+                // Coba koneksi ke database
+                const { error } = await supabase
                     .from('users')
                     .select('count', { count: 'exact', head: true });
 
-                const result = await Promise.race([connectionPromise, timeoutPromise]);
-
-                // Tutup loading
                 Swal.close();
 
-                if (result.error) {
-                    // Cek jenis error
-                    if (result.error.message.includes('relation') && result.error.message.includes('does not exist')) {
-                        // Tabel belum dibuat
+                if (error) {
+                    if (error.message.includes('relation') && error.message.includes('does not exist')) {
                         Swal.fire({
                             icon: 'warning',
-                            title: 'Database Terhubung Tapi Tabel Belum Ada',
+                            title: '⚠️ Koneksi Berhasil Tapi Tabel Belum Ada',
                             html: `
                                 <div style="text-align: left;">
-                                    <p>✅ Koneksi ke Supabase berhasil!</p>
-                                    <p>⚠️ Tabel database belum dibuat.</p>
-                                    <p style="margin-top: 15px;"><strong>Langkah yang harus dilakukan:</strong></p>
-                                    <ol style="margin-left: 20px;">
-                                        <li>Buka Supabase Dashboard</li>
-                                        <li>Klik SQL Editor</li>
+                                    <p style="color: #27ae60;">✅ Koneksi ke Supabase berhasil!</p>
+                                    <p style="color: #e67e22; margin-top: 10px;">⚠️ Tabel database belum dibuat.</p>
+                                    <p style="margin-top: 15px;"><strong>📝 Langkah yang harus dilakukan:</strong></p>
+                                    <ol style="margin-left: 20px; text-align: left;">
+                                        <li>Buka <a href="https://app.supabase.com" target="_blank">Supabase Dashboard</a></li>
+                                        <li>Pilih project Anda</li>
+                                        <li>Klik "SQL Editor"</li>
                                         <li>Jalankan SQL untuk membuat tabel</li>
                                     </ol>
                                     <p style="margin-top: 15px;">Klik tombol di bawah untuk melihat SQL yang diperlukan.</p>
                                 </div>
                             `,
-                            confirmButtonText: 'Lihat SQL',
+                            confirmButtonText: '📋 Lihat SQL',
                             showCancelButton: true,
                             cancelButtonText: 'Nanti'
                         }).then((result) => {
@@ -660,7 +651,7 @@
                                     title: 'SQL untuk Membuat Tabel',
                                     html: `
                                         <div style="text-align: left; background: #f5f5f5; padding: 15px; border-radius: 10px; overflow-x: auto;">
-                                            <pre style="font-size: 12px;">
+                                            <pre style="font-size: 12px; white-space: pre-wrap;">
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username TEXT UNIQUE NOT NULL,
@@ -704,34 +695,32 @@ CREATE TABLE IF NOT EXISTS public.likes (
                                     cancelButtonText: 'Tutup'
                                 }).then((result) => {
                                     if (result.isConfirmed) {
-                                        checkDatabaseConnection(); // Cek ulang
+                                        checkDatabaseConnection();
                                     }
                                 });
                             }
                         });
                     } else {
-                        // Error lain
                         Swal.fire({
                             icon: 'error',
-                            title: 'Koneksi Database Gagal!',
+                            title: '❌ Koneksi Database Gagal!',
                             html: `
                                 <div style="text-align: left;">
                                     <p>Tidak dapat terhubung ke database Supabase.</p>
-                                    <p style="color: #e74c3c; margin-top: 10px;">Error: ${result.error.message}</p>
-                                    <p style="margin-top: 15px;"><strong>Solusi:</strong></p>
-                                    <ul style="margin-left: 20px;">
-                                        <li>Periksa URL dan API Key</li>
+                                    <p style="color: #e74c3c; margin-top: 10px;">Error: ${error.message}</p>
+                                    <p style="margin-top: 15px;"><strong>🔧 Solusi:</strong></p>
+                                    <ul style="margin-left: 20px; text-align: left;">
+                                        <li>Periksa URL dan API Key di file index.html</li>
                                         <li>Pastikan project Supabase aktif</li>
                                         <li>Cek koneksi internet</li>
+                                        <li>Cek firewall atau VPN</li>
                                     </ul>
                                 </div>
                             `,
-                            confirmButtonText: 'Coba Lagi',
-                            showCancelButton: true,
-                            cancelButtonText: 'Tutup'
+                            confirmButtonText: 'Coba Lagi'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                checkDatabaseConnection(); // Coba lagi
+                                checkDatabaseConnection();
                             }
                         });
                     }
@@ -741,7 +730,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 // Koneksi berhasil dan tabel sudah ada
                 Swal.fire({
                     icon: 'success',
-                    title: 'Koneksi Database Berhasil! ✅',
+                    title: '✅ Koneksi Database Berhasil!',
                     html: `
                         <div style="text-align: left;">
                             <p>✓ Terhubung ke Supabase</p>
@@ -758,47 +747,22 @@ CREATE TABLE IF NOT EXISTS public.likes (
             } catch (error) {
                 Swal.close();
                 
-                if (error.message === 'Timeout') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Koneksi Timeout!',
-                        html: `
-                            <div style="text-align: left;">
-                                <p>Koneksi ke database terlalu lama.</p>
-                                <p style="margin-top: 10px;"><strong>Kemungkinan penyebab:</strong></p>
-                                <ul style="margin-left: 20px;">
-                                    <li>Koneksi internet lambat</li>
-                                    <li>Server Supabase sedang sibuk</li>
-                                    <li>Firewall memblokir koneksi</li>
-                                </ul>
-                            </div>
-                        `,
-                        confirmButtonText: 'Coba Lagi',
-                        showCancelButton: true,
-                        cancelButtonText: 'Tutup'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            checkDatabaseConnection();
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error Koneksi!',
-                        text: error.message,
-                        confirmButtonText: 'Coba Lagi'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            checkDatabaseConnection();
-                        }
-                    });
-                }
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error Koneksi!',
+                    text: error.message,
+                    confirmButtonText: 'Coba Lagi'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        checkDatabaseConnection();
+                    }
+                });
                 return false;
             }
         }
 
         // =====================================================
-        // AUTH FUNCTIONS WITH SWEET ALERT
+        // AUTH FUNCTIONS
         // =====================================================
 
         // Show register form
@@ -824,7 +788,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (!username || !email || !password || !confirmPass) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Oops...',
+                    title: '⚠️ Oops...',
                     text: 'Semua field harus diisi!',
                     timer: 2000,
                     showConfirmButton: false
@@ -835,7 +799,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (username.length < 3) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Username Terlalu Pendek',
+                    title: '⚠️ Username Terlalu Pendek',
                     text: 'Username minimal 3 karakter!',
                     timer: 2000,
                     showConfirmButton: false
@@ -845,10 +809,10 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
             if (!email.includes('@') || !email.includes('.')) {
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Email Tidak Valid',
-                    text: 'Masukkan email yang benar!',
-                    timer: 2000,
+                    icon: 'error',
+                    title: '❌ Email Tidak Valid',
+                    text: 'Masukkan email yang benar (contoh: nama@gmail.com)',
+                    timer: 3000,
                     showConfirmButton: false
                 });
                 return;
@@ -857,7 +821,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (password.length < 6) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Password Terlalu Pendek',
+                    title: '⚠️ Password Terlalu Pendek',
                     text: 'Password minimal 6 karakter!',
                     timer: 2000,
                     showConfirmButton: false
@@ -868,7 +832,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (password !== confirmPass) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Password Tidak Cocok',
+                    title: '❌ Password Tidak Cocok',
                     text: 'Password dan konfirmasi password harus sama!',
                     timer: 2000,
                     showConfirmButton: false
@@ -896,8 +860,26 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 if (existingUser) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Registrasi Gagal',
+                        title: '❌ Registrasi Gagal',
                         text: 'Username sudah digunakan!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                // Cek apakah email sudah ada
+                const { data: existingEmail, error: checkEmailError } = await supabase
+                    .from('users')
+                    .select('email')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                if (existingEmail) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Registrasi Gagal',
+                        text: 'Email sudah terdaftar!',
                         timer: 2000,
                         showConfirmButton: false
                     });
@@ -918,7 +900,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 if (authError) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Registrasi Gagal',
+                        title: '❌ Registrasi Gagal',
                         text: authError.message,
                         timer: 3000,
                         showConfirmButton: false
@@ -940,12 +922,9 @@ CREATE TABLE IF NOT EXISTS public.likes (
                     ]);
 
                 if (dbError) {
-                    // Rollback: hapus user dari auth
-                    await supabase.auth.admin.deleteUser(authData.user.id);
-                    
                     Swal.fire({
                         icon: 'error',
-                        title: 'Registrasi Gagal',
+                        title: '❌ Registrasi Gagal',
                         text: 'Gagal menyimpan data user: ' + dbError.message,
                         timer: 3000,
                         showConfirmButton: false
@@ -955,10 +934,17 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Registrasi Berhasil!',
-                    text: 'Silakan login dengan akun Anda',
-                    timer: 2000,
-                    showConfirmButton: false
+                    title: '✅ Registrasi Berhasil!',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>✓ Akun berhasil dibuat!</p>
+                            <p>📧 Email: ${email}</p>
+                            <p style="color: #f39c12; margin-top: 15px;">
+                                ⚠️ Cek email Anda untuk verifikasi sebelum login!
+                            </p>
+                        </div>
+                    `,
+                    confirmButtonText: 'OK'
                 });
 
                 // Clear form
@@ -967,12 +953,12 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 document.getElementById('regPassword').value = '';
                 document.getElementById('regConfirmPassword').value = '';
                 
-                setTimeout(() => showLogin(), 2000);
+                setTimeout(() => showLogin(), 3000);
 
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
+                    title: '❌ Error',
                     text: error.message,
                     timer: 3000,
                     showConfirmButton: false
@@ -988,7 +974,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (!username || !password) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Oops...',
+                    title: '⚠️ Oops...',
                     text: 'Username dan password harus diisi!',
                     timer: 2000,
                     showConfirmButton: false
@@ -1016,7 +1002,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 if (!userData) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Login Gagal',
+                        title: '❌ Login Gagal',
                         text: 'Username tidak ditemukan!',
                         timer: 2000,
                         showConfirmButton: false
@@ -1033,7 +1019,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 if (authError) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Login Gagal',
+                        title: '❌ Login Gagal',
                         text: 'Password salah!',
                         timer: 2000,
                         showConfirmButton: false
@@ -1048,6 +1034,17 @@ CREATE TABLE IF NOT EXISTS public.likes (
                     .eq('id', authData.user.id)
                     .single();
 
+                if (fetchError) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Error',
+                        text: 'Gagal mengambil data user',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
                 currentUser = fullUserData;
                 
                 // Update UI
@@ -1057,7 +1054,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Login Berhasil!',
+                    title: '✅ Login Berhasil!',
                     text: `Selamat datang, ${fullUserData.username}!`,
                     timer: 2000,
                     showConfirmButton: false
@@ -1073,7 +1070,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
+                    title: '❌ Error',
                     text: error.message,
                     timer: 3000,
                     showConfirmButton: false
@@ -1100,7 +1097,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Logout Berhasil',
+                    title: '✅ Logout Berhasil',
                     text: 'Sampai jumpa lagi!',
                     timer: 1500,
                     showConfirmButton: false
@@ -1109,7 +1106,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
+                    title: '❌ Error',
                     text: error.message,
                     timer: 2000,
                     showConfirmButton: false
@@ -1158,11 +1155,10 @@ CREATE TABLE IF NOT EXISTS public.likes (
             const preview = document.getElementById('preview');
             
             if (file) {
-                // Validasi tipe file
                 if (!file.type.startsWith('image/')) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'File Tidak Valid',
+                        title: '❌ File Tidak Valid',
                         text: 'File harus berupa gambar!',
                         timer: 2000,
                         showConfirmButton: false
@@ -1170,11 +1166,10 @@ CREATE TABLE IF NOT EXISTS public.likes (
                     return;
                 }
 
-                // Validasi ukuran file (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Ukuran File Terlalu Besar',
+                        title: '❌ Ukuran File Terlalu Besar',
                         text: 'Maksimal ukuran file 5MB!',
                         timer: 2000,
                         showConfirmButton: false
@@ -1195,7 +1190,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
         // POST FUNCTIONS
         // =====================================================
 
-        // Handle upload
         async function handleUpload() {
             const fileInput = document.getElementById('fileInput');
             const caption = document.getElementById('caption').value.trim();
@@ -1203,7 +1197,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (!fileInput.files[0]) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Pilih Foto',
+                    title: '⚠️ Pilih Foto',
                     text: 'Pilih foto terlebih dahulu!',
                     timer: 2000,
                     showConfirmButton: false
@@ -1214,7 +1208,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (!caption) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Tulis Caption',
+                    title: '⚠️ Tulis Caption',
                     text: 'Tulis caption untuk foto!',
                     timer: 2000,
                     showConfirmButton: false
@@ -1237,19 +1231,16 @@ CREATE TABLE IF NOT EXISTS public.likes (
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 const filePath = `photos/${fileName}`;
 
-                // Upload ke Supabase Storage
                 const { error: uploadError } = await supabase.storage
                     .from('gallery')
                     .upload(filePath, file);
 
                 if (uploadError) throw uploadError;
 
-                // Get public URL
                 const { data: urlData } = supabase.storage
                     .from('gallery')
                     .getPublicUrl(filePath);
 
-                // Simpan ke database
                 const { error: postError } = await supabase
                     .from('posts')
                     .insert([
@@ -1267,13 +1258,12 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Upload Berhasil!',
+                    title: '✅ Upload Berhasil!',
                     text: 'Foto berhasil diupload',
                     timer: 1500,
                     showConfirmButton: false
                 });
 
-                // Reset form
                 document.getElementById('fileInput').value = '';
                 document.getElementById('caption').value = '';
                 document.getElementById('preview').style.display = 'none';
@@ -1283,7 +1273,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Upload Gagal',
+                    title: '❌ Upload Gagal',
                     text: error.message,
                     timer: 3000,
                     showConfirmButton: false
@@ -1291,7 +1281,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
             }
         }
 
-        // Load posts
         async function loadPosts(type = 'all') {
             try {
                 let query = supabase
@@ -1334,7 +1323,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
                 let html = '';
                 for (let post of posts) {
-                    // Check if current user liked this post
                     let isLiked = false;
                     if (currentUser) {
                         const { data: likeData } = await supabase
@@ -1347,7 +1335,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                         isLiked = !!likeData;
                     }
 
-                    // Get comments for this post
                     const { data: comments } = await supabase
                         .from('comments')
                         .select(`
@@ -1383,7 +1370,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                                     </div>
                                 ` : ''}
                                 
-                                <!-- Comments Section -->
                                 <div class="comments-section">
                                     ${comments?.map(comment => `
                                         <div class="comment">
@@ -1411,19 +1397,17 @@ CREATE TABLE IF NOT EXISTS public.likes (
             }
         }
 
-        // Handle comment key press
         function handleCommentKeyPress(event, postId) {
             if (event.key === 'Enter') {
                 addComment(postId);
             }
         }
 
-        // Toggle like
         async function toggleLike(postId) {
             if (!currentUser) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Login Dulu',
+                    title: '⚠️ Login Dulu',
                     text: 'Silakan login untuk like foto',
                     timer: 2000,
                     showConfirmButton: false
@@ -1432,7 +1416,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
             }
 
             try {
-                // Check if already liked
                 const { data: existingLike } = await supabase
                     .from('likes')
                     .select('*')
@@ -1441,14 +1424,12 @@ CREATE TABLE IF NOT EXISTS public.likes (
                     .maybeSingle();
 
                 if (existingLike) {
-                    // Unlike
                     await supabase
                         .from('likes')
                         .delete()
                         .eq('post_id', postId)
                         .eq('user_id', currentUser.id);
 
-                    // Update likes count
                     const { data: post } = await supabase
                         .from('posts')
                         .select('likes_count')
@@ -1461,7 +1442,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                         .eq('id', postId);
 
                 } else {
-                    // Like
                     await supabase
                         .from('likes')
                         .insert([{ 
@@ -1469,7 +1449,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                             user_id: currentUser.id 
                         }]);
 
-                    // Update likes count
                     const { data: post } = await supabase
                         .from('posts')
                         .select('likes_count')
@@ -1482,7 +1461,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                         .eq('id', postId);
                 }
 
-                // Refresh posts
                 const activePage = document.querySelector('.nav-item.active').textContent;
                 if (activePage.includes('Beranda')) {
                     await loadPosts('all');
@@ -1495,12 +1473,11 @@ CREATE TABLE IF NOT EXISTS public.likes (
             }
         }
 
-        // Add comment
         async function addComment(postId) {
             if (!currentUser) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Login Dulu',
+                    title: '⚠️ Login Dulu',
                     text: 'Silakan login untuk komentar',
                     timer: 2000,
                     showConfirmButton: false
@@ -1514,7 +1491,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
             if (!content) return;
 
             try {
-                // Insert comment
                 await supabase
                     .from('comments')
                     .insert([{
@@ -1523,7 +1499,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
                         content: content
                     }]);
 
-                // Update comments count
                 const { data: post } = await supabase
                     .from('posts')
                     .select('comments_count')
@@ -1537,7 +1512,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
                 input.value = '';
 
-                // Refresh posts
                 const activePage = document.querySelector('.nav-item.active').textContent;
                 if (activePage.includes('Beranda')) {
                     await loadPosts('all');
@@ -1550,7 +1524,6 @@ CREATE TABLE IF NOT EXISTS public.likes (
             }
         }
 
-        // Delete post
         async function deletePost(postId) {
             const result = await Swal.fire({
                 title: 'Hapus Foto?',
@@ -1574,21 +1547,18 @@ CREATE TABLE IF NOT EXISTS public.likes (
                     }
                 });
 
-                // Get post data to delete image from storage
                 const { data: post } = await supabase
                     .from('posts')
                     .select('image_filename')
                     .eq('id', postId)
                     .single();
 
-                // Delete from storage
                 if (post?.image_filename) {
                     await supabase.storage
                         .from('gallery')
                         .remove([`photos/${post.image_filename}`]);
                 }
 
-                // Delete from database
                 await supabase
                     .from('posts')
                     .delete()
@@ -1597,13 +1567,12 @@ CREATE TABLE IF NOT EXISTS public.likes (
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Berhasil Dihapus!',
+                    title: '✅ Berhasil Dihapus!',
                     text: 'Foto telah dihapus',
                     timer: 1500,
                     showConfirmButton: false
                 });
 
-                // Refresh posts
                 const activePage = document.querySelector('.nav-item.active').textContent;
                 if (activePage.includes('Beranda')) {
                     await loadPosts('all');
@@ -1614,7 +1583,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal Hapus',
+                    title: '❌ Gagal Hapus',
                     text: error.message,
                     timer: 2000,
                     showConfirmButton: false
@@ -1625,27 +1594,19 @@ CREATE TABLE IF NOT EXISTS public.likes (
         // Check session on load
         async function checkSession() {
             // Cek koneksi database dulu
-            const isConnected = await checkDatabaseConnection();
-            
-            if (!isConnected) {
-                // Jika koneksi gagal, tampilkan pesan dan disable form
-                document.querySelectorAll('input, button').forEach(el => {
-                    el.disabled = true;
-                });
-                return;
-            }
+            await checkDatabaseConnection();
 
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 
                 if (session) {
-                    const { data: userData } = await supabase
+                    const { data: userData, error } = await supabase
                         .from('users')
                         .select('*')
                         .eq('id', session.user.id)
                         .single();
 
-                    if (userData) {
+                    if (!error && userData) {
                         currentUser = userData;
                         document.getElementById('authContainer').style.display = 'none';
                         document.getElementById('mainApp').style.display = 'block';
@@ -1654,7 +1615,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
                         
                         Swal.fire({
                             icon: 'success',
-                            title: 'Selamat Datang Kembali!',
+                            title: '✅ Selamat Datang Kembali!',
                             text: `Halo ${userData.username}`,
                             timer: 1500,
                             showConfirmButton: false
@@ -1667,7 +1628,7 @@ CREATE TABLE IF NOT EXISTS public.likes (
         }
 
         // Initialize
-        checkSession();
+        window.onload = checkSession;
     </script>
 </body>
 </html>
