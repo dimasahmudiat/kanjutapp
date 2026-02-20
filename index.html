@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - Supabase</title>
+    <title>GalleryApp - Supabase Integration</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
 
-        .container {
+        .app-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
@@ -35,15 +35,31 @@
             background: white;
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 400px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .auth-card h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #333;
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .input-group {
@@ -63,11 +79,13 @@
             border: 2px solid #e1e1e1;
             border-radius: 10px;
             font-size: 16px;
+            transition: all 0.3s;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
@@ -80,16 +98,17 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
             margin-bottom: 10px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn-secondary {
-            background: #95a5a6;
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
 
         .auth-link {
@@ -117,7 +136,7 @@
         .navbar {
             background: white;
             padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -127,18 +146,22 @@
         .nav-brand {
             font-size: 24px;
             font-weight: 700;
-            color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .nav-menu {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .nav-item {
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 10px;
+            transition: all 0.3s;
             font-weight: 500;
         }
 
@@ -147,19 +170,22 @@
         }
 
         .nav-item.active {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .user-info {
+        .user-section {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .username {
+        .username-badge {
             font-weight: 600;
             color: #333;
+            background: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 20px;
         }
 
         .logout-btn {
@@ -169,11 +195,29 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
 
-        /* Content */
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Content Area */
         .content {
             padding: 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            color: #333;
+            font-size: 28px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
         }
 
         /* Gallery Grid */
@@ -188,7 +232,13 @@
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
         .photo-image {
@@ -197,19 +247,24 @@
             object-fit: cover;
         }
 
-        .photo-info {
+        .photo-details {
             padding: 20px;
         }
 
         .photo-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
         }
 
         .photo-author {
             font-weight: 600;
             color: #667eea;
+            background: #f0f0f0;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 14px;
         }
 
         .photo-date {
@@ -219,7 +274,9 @@
 
         .photo-caption {
             color: #666;
-            margin: 10px 0;
+            line-height: 1.6;
+            margin: 15px 0;
+            font-size: 15px;
         }
 
         .photo-stats {
@@ -236,18 +293,15 @@
             margin-top: 15px;
         }
 
-        .like-btn, .delete-btn, .comment-btn {
-            padding: 8px 15px;
+        .like-btn {
+            padding: 8px;
+            background: #f0f0f0;
+            color: #333;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
             flex: 1;
-        }
-
-        .like-btn {
-            background: #f0f0f0;
-            color: #333;
         }
 
         .like-btn.liked {
@@ -256,22 +310,43 @@
         }
 
         .delete-btn {
+            padding: 8px;
             background: #e74c3c;
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
         }
 
         .comment-btn {
+            padding: 8px;
             background: #3498db;
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
         }
 
         /* Upload Form */
-        .upload-form {
+        .upload-section {
             background: white;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        .upload-section h3 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
         }
 
         .file-upload {
@@ -280,7 +355,18 @@
             text-align: center;
             border-radius: 10px;
             cursor: pointer;
+            transition: all 0.3s;
             margin-bottom: 20px;
+        }
+
+        .file-upload:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload p {
+            color: #667eea;
+            font-size: 18px;
         }
 
         .file-upload input {
@@ -295,60 +381,24 @@
             display: none;
         }
 
+        .image-preview.show {
+            display: block;
+        }
+
         textarea {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 2px solid #e1e1e1;
             border-radius: 10px;
+            font-size: 16px;
             min-height: 100px;
+            resize: vertical;
             margin-bottom: 20px;
         }
 
-        /* Alert */
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px;
-            display: none;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 50px;
-            color: #999;
-            grid-column: 1/-1;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 50px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         /* Comments Section */
@@ -391,6 +441,64 @@
             cursor: pointer;
         }
 
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 18px;
+            grid-column: 1/-1;
+        }
+
+        .empty-state i {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .navbar {
                 padding: 15px;
@@ -402,55 +510,63 @@
                 margin: 10px 0;
             }
             
+            .content {
+                padding: 20px;
+            }
+            
             .gallery-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .photo-actions {
+                flex-direction: column;
             }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <!-- Auth Container -->
         <div id="authContainer" class="auth-container">
-            <!-- Login -->
+            <!-- Login Card -->
             <div id="loginCard" class="auth-card">
                 <h2>📸 GalleryApp</h2>
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="loginUsername" placeholder="Username">
+                    <input type="text" id="loginUsername" placeholder="Masukkan username">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Password">
+                    <input type="password" id="loginPassword" placeholder="Masukkan password">
                 </div>
-                <button class="btn" onclick="login()">Login</button>
+                <button class="btn" onclick="handleLogin()">Login</button>
                 <div class="auth-link">
-                    Belum punya akun? <a onclick="showRegister()">Daftar</a>
+                    Belum punya akun? <a onclick="showRegister()">Daftar disini</a>
                 </div>
             </div>
 
-            <!-- Register -->
+            <!-- Register Card -->
             <div id="registerCard" class="auth-card" style="display: none;">
-                <h2>📝 Daftar Akun</h2>
+                <h2>📝 Daftar Akun Baru</h2>
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="regUsername" placeholder="Username">
+                    <input type="text" id="regUsername" placeholder="Pilih username">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="regPassword" placeholder="Password">
+                    <input type="password" id="regPassword" placeholder="Buat password">
                 </div>
                 <div class="input-group">
                     <label>Konfirmasi Password</label>
-                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
+                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi password">
                 </div>
-                <button class="btn" onclick="register()">Daftar</button>
-                <button class="btn btn-secondary" onclick="showLogin()">Kembali</button>
+                <button class="btn" onclick="handleRegister()">Daftar</button>
+                <button class="btn btn-secondary" onclick="showLogin()">Kembali ke Login</button>
             </div>
         </div>
 
-        <!-- Main App -->
+        <!-- Main App Container -->
         <div id="mainApp" class="main-app">
             <!-- Navbar -->
             <nav class="navbar">
@@ -458,35 +574,50 @@
                 <div class="nav-menu">
                     <div class="nav-item active" onclick="showPage('home')">🏠 Beranda</div>
                     <div class="nav-item" onclick="showPage('upload')">📤 Upload</div>
+                    <div class="nav-item" onclick="showPage('myphotos')">🖼️ Fotoku</div>
                 </div>
-                <div class="user-info">
-                    <span class="username" id="currentUsername"></span>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
+                <div class="user-section">
+                    <span class="username-badge" id="displayUsername"></span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
                 </div>
             </nav>
 
             <!-- Alert -->
             <div id="alertMessage" class="alert"></div>
 
-            <!-- Content -->
+            <!-- Content Area -->
             <div class="content">
-                <!-- Home Page -->
+                <!-- Home Page (Semua Foto) -->
                 <div id="homePage">
-                    <h2>📸 Gallery Foto</h2>
-                    <div id="galleryContainer" class="gallery-grid"></div>
+                    <div class="page-header">
+                        <h2>📸 Semua Foto</h2>
+                    </div>
+                    <div id="galleryContainer" class="gallery-grid">
+                        <!-- Gallery will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Photos Page -->
+                <div id="myPhotosPage" style="display: none;">
+                    <div class="page-header">
+                        <h2>🖼️ Fotoku</h2>
+                    </div>
+                    <div id="myPhotosContainer" class="gallery-grid">
+                        <!-- My photos will be loaded here -->
+                    </div>
                 </div>
 
                 <!-- Upload Page -->
                 <div id="uploadPage" style="display: none;">
-                    <div class="upload-form">
+                    <div class="upload-section">
                         <h3>📤 Upload Foto Baru</h3>
                         <div class="file-upload" onclick="document.getElementById('fileInput').click()">
                             <p>Klik untuk pilih foto</p>
                             <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
                         </div>
-                        <img id="preview" class="image-preview">
-                        <textarea id="caption" placeholder="Tulis caption..."></textarea>
-                        <button class="btn" onclick="uploadPost()">Upload</button>
+                        <img id="preview" class="image-preview" alt="Preview">
+                        <textarea id="caption" placeholder="Tulis caption untuk foto ini..."></textarea>
+                        <button class="btn" onclick="handleUpload()">Upload Foto</button>
                     </div>
                 </div>
             </div>
@@ -494,26 +625,38 @@
     </div>
 
     <script>
-        // Supabase Configuration
+        // =====================================================
+        // SUPABASE CONFIGURATION - Menggunakan credentials dari Vercel
+        // =====================================================
         const supabaseUrl = 'https://athsijudenxngliekkbm.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDA4MjAsImV4cCI6MjA4NzE3NjgyMH0.VSJoK7oEAeXBAvCsf5f9E3ruVJywfjXs7qyHAfzVPkY';
+        const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0aHNpanVkZW54bmdsaWVra2JtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTYwMDgyMCwiZXhwIjoyMDg3MTc2ODIwfQ.QrrMjYiHC5b_eClaGysNoD7KjSHJKXUpYJIH9dcsysM';
+        
+        // Initialize Supabase client
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+        // Global variables
         let currentUser = null;
+        let currentEditId = null;
 
-        // Auth Functions
+        // =====================================================
+        // AUTH FUNCTIONS
+        // =====================================================
+
+        // Show register form
         function showRegister() {
             document.getElementById('loginCard').style.display = 'none';
             document.getElementById('registerCard').style.display = 'block';
         }
 
+        // Show login form
         function showLogin() {
             document.getElementById('loginCard').style.display = 'block';
             document.getElementById('registerCard').style.display = 'none';
         }
 
-        // Register
-        async function register() {
+        // Handle register
+        async function handleRegister() {
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
             const confirmPass = document.getElementById('regConfirmPassword').value;
@@ -528,13 +671,28 @@
                 return;
             }
 
+            if (username.length < 3) {
+                showAlert('Username minimal 3 karakter!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('Password minimal 6 karakter!', 'error');
+                return;
+            }
+
             try {
+                showLoading(true, 'Mendaftarkan akun...');
+
                 // Register ke Supabase Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: `${username}@gallery.app`,
                     password: password,
                     options: {
-                        data: { username: username }
+                        data: {
+                            username: username,
+                            full_name: username
+                        }
                     }
                 });
 
@@ -543,25 +701,36 @@
                 // Simpan ke tabel users
                 const { error: dbError } = await supabase
                     .from('users')
-                    .insert([{
-                        id: authData.user.id,
-                        username: username,
-                        email: `${username}@gallery.app`,
-                        full_name: username
-                    }]);
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            username: username,
+                            email: `${username}@gallery.app`,
+                            full_name: username,
+                            avatar_url: `https://ui-avatars.com/api/?name=${username}&background=667eea&color=fff&size=100`
+                        }
+                    ]);
 
                 if (dbError) throw dbError;
 
                 showAlert('Registrasi berhasil! Silakan login.', 'success');
-                setTimeout(showLogin, 1500);
+                
+                // Clear form
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regConfirmPassword').value = '';
+                
+                setTimeout(() => showLogin(), 1500);
 
             } catch (error) {
                 showAlert('Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Login
-        async function login() {
+        // Handle login
+        async function handleLogin() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
@@ -571,6 +740,8 @@
             }
 
             try {
+                showLoading(true, 'Login...');
+
                 const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
                     email: `${username}@gallery.app`,
                     password: password
@@ -578,6 +749,7 @@
 
                 if (authError) throw authError;
 
+                // Ambil data user dari tabel users
                 const { data: userData, error: userError } = await supabase
                     .from('users')
                     .select('*')
@@ -587,48 +759,115 @@
                 if (userError) throw userError;
 
                 currentUser = userData;
+                
+                // Update UI
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('currentUsername').textContent = userData.username;
+                document.getElementById('displayUsername').textContent = userData.username;
                 
-                showAlert('Login berhasil!', 'success');
+                showAlert(`Selamat datang, ${userData.username}!`, 'success');
+                
+                // Clear login form
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                // Load posts
                 showPage('home');
-                loadPosts();
 
             } catch (error) {
                 showAlert('Login gagal: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Logout
-        async function logout() {
+        // Handle logout
+        async function handleLogout() {
             await supabase.auth.signOut();
             currentUser = null;
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
+            showAlert('Anda telah logout', 'success');
         }
 
-        // Navigation
-        function showPage(page) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            if (page === 'home') {
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-                document.getElementById('homePage').style.display = 'block';
-                document.getElementById('uploadPage').style.display = 'none';
-                loadPosts();
-            } else {
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-                document.getElementById('homePage').style.display = 'none';
-                document.getElementById('uploadPage').style.display = 'block';
+        // Check session on load
+        async function checkSession() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    const { data: userData, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (!error && userData) {
+                        currentUser = userData;
+                        document.getElementById('authContainer').style.display = 'none';
+                        document.getElementById('mainApp').style.display = 'block';
+                        document.getElementById('displayUsername').textContent = userData.username;
+                        showPage('home');
+                    }
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
             }
         }
 
-        // Preview Image
+        // =====================================================
+        // NAVIGATION FUNCTIONS
+        // =====================================================
+
+        function showPage(page) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            if (page === 'home') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('homePage').style.display = 'block';
+                document.getElementById('myPhotosPage').style.display = 'none';
+                document.getElementById('uploadPage').style.display = 'none';
+                loadPosts('all');
+            } else if (page === 'myphotos') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'block';
+                document.getElementById('uploadPage').style.display = 'none';
+                loadPosts('my');
+            } else {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('myPhotosPage').style.display = 'none';
+                document.getElementById('uploadPage').style.display = 'block';
+                
+                // Reset form upload
+                document.getElementById('fileInput').value = '';
+                document.getElementById('caption').value = '';
+                document.getElementById('preview').style.display = 'none';
+            }
+        }
+
+        // =====================================================
+        // IMAGE PREVIEW
+        // =====================================================
+
         function previewImage(event) {
             const file = event.target.files[0];
             const preview = document.getElementById('preview');
             
             if (file) {
+                // Validasi tipe file
+                if (!file.type.startsWith('image/')) {
+                    showAlert('File harus berupa gambar!', 'error');
+                    return;
+                }
+
+                // Validasi ukuran file (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('Ukuran file maksimal 5MB!', 'error');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
@@ -638,53 +877,70 @@
             }
         }
 
-        // Upload Post
-        async function uploadPost() {
+        // =====================================================
+        // POST FUNCTIONS
+        // =====================================================
+
+        // Handle upload
+        async function handleUpload() {
             const fileInput = document.getElementById('fileInput');
             const caption = document.getElementById('caption').value;
 
             if (!fileInput.files[0]) {
-                showAlert('Pilih foto dulu!', 'error');
+                showAlert('Pilih foto terlebih dahulu!', 'error');
                 return;
             }
 
             if (!caption) {
-                showAlert('Tulis caption!', 'error');
+                showAlert('Tulis caption untuk foto!', 'error');
                 return;
             }
 
-            showLoading(true);
+            showLoading(true, 'Uploading...');
 
             try {
                 const file = fileInput.files[0];
-                const fileName = `${Date.now()}_${file.name}`;
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `photos/${fileName}`;
 
-                // Upload ke Storage
+                // Upload ke Supabase Storage
                 const { error: uploadError } = await supabase.storage
                     .from('gallery')
-                    .upload(`photos/${fileName}`, file);
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
                 if (uploadError) throw uploadError;
 
-                // Get Public URL
+                // Get public URL
                 const { data: urlData } = supabase.storage
                     .from('gallery')
-                    .getPublicUrl(`photos/${fileName}`);
+                    .getPublicUrl(filePath);
 
-                // Save to database
+                // Simpan ke database
                 const { error: postError } = await supabase
                     .from('posts')
-                    .insert([{
-                        user_id: currentUser.id,
-                        image_url: urlData.publicUrl,
-                        image_filename: fileName,
-                        caption: caption
-                    }]);
+                    .insert([
+                        {
+                            user_id: currentUser.id,
+                            image_url: urlData.publicUrl,
+                            image_filename: fileName,
+                            caption: caption,
+                            likes_count: 0,
+                            comments_count: 0
+                        }
+                    ]);
 
                 if (postError) throw postError;
 
                 showAlert('Foto berhasil diupload!', 'success');
-                setTimeout(() => showPage('home'), 1500);
+                
+                // Reset form dan kembali ke home
+                setTimeout(() => {
+                    showPage('home');
+                }, 1500);
 
             } catch (error) {
                 showAlert('Gagal upload: ' + error.message, 'error');
@@ -693,10 +949,12 @@
             }
         }
 
-        // Load Posts
-        async function loadPosts() {
+        // Load posts
+        async function loadPosts(type = 'all') {
             try {
-                const { data: posts, error } = await supabase
+                showLoading(true, 'Loading posts...');
+
+                let query = supabase
                     .from('posts')
                     .select(`
                         *,
@@ -708,24 +966,43 @@
                     `)
                     .order('created_at', { ascending: false });
 
+                if (type === 'my' && currentUser) {
+                    query = query.eq('user_id', currentUser.id);
+                }
+
+                const { data: posts, error } = await query;
+
                 if (error) throw error;
 
-                const container = document.getElementById('galleryContainer');
-                
+                const container = type === 'all' ? 
+                    document.getElementById('galleryContainer') : 
+                    document.getElementById('myPhotosContainer');
+
                 if (!posts || posts.length === 0) {
-                    container.innerHTML = '<div class="empty-state">Belum ada foto</div>';
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i>📷</i>
+                            <h3>Belum ada foto</h3>
+                            <p>${type === 'all' ? 'Upload foto pertamamu sekarang!' : 'Kamu belum upload foto'}</p>
+                        </div>
+                    `;
                     return;
                 }
 
                 let html = '';
                 for (let post of posts) {
-                    // Check if user liked this post
-                    const { data: likeData } = await supabase
-                        .from('likes')
-                        .select('*')
-                        .eq('post_id', post.id)
-                        .eq('user_id', currentUser?.id)
-                        .maybeSingle();
+                    // Check if current user liked this post
+                    let isLiked = false;
+                    if (currentUser) {
+                        const { data: likeData } = await supabase
+                            .from('likes')
+                            .select('*')
+                            .eq('post_id', post.id)
+                            .eq('user_id', currentUser.id)
+                            .maybeSingle();
+                        
+                        isLiked = !!likeData;
+                    }
 
                     // Get comments for this post
                     const { data: comments } = await supabase
@@ -735,43 +1012,49 @@
                             users:user_id (username)
                         `)
                         .eq('post_id', post.id)
-                        .order('created_at', { ascending: true });
+                        .order('created_at', { ascending: true })
+                        .limit(5);
 
                     html += `
                         <div class="photo-card" id="post-${post.id}">
-                            <img src="${post.image_url}" class="photo-image">
-                            <div class="photo-info">
+                            <img src="${post.image_url}" class="photo-image" alt="Photo" onerror="this.src='https://via.placeholder.com/300?text=Error+Loading'">
+                            <div class="photo-details">
                                 <div class="photo-header">
-                                    <span class="photo-author">👤 ${post.users.username}</span>
-                                    <span class="photo-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                                    <span class="photo-author">👤 ${post.users?.username || 'Unknown'}</span>
+                                    <span class="photo-date">${new Date(post.created_at).toLocaleDateString('id-ID')}</span>
                                 </div>
-                                <p class="photo-caption">${post.caption}</p>
+                                <p class="photo-caption">${post.caption || 'No caption'}</p>
                                 <div class="photo-stats">
-                                    <span>❤️ ${post.likes_count} likes</span>
-                                    <span>💬 ${post.comments_count} comments</span>
+                                    <span>❤️ ${post.likes_count || 0} likes</span>
+                                    <span>💬 ${post.comments_count || 0} comments</span>
                                 </div>
-                                <div class="photo-actions">
-                                    <button class="like-btn ${likeData ? 'liked' : ''}" onclick="toggleLike(${post.id})">
-                                        ${likeData ? '❤️ Unlike' : '🤍 Like'}
-                                    </button>
-                                    ${post.user_id === currentUser?.id ? 
-                                        `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : ''
-                                    }
-                                </div>
+                                ${currentUser ? `
+                                    <div class="photo-actions">
+                                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                                            ${isLiked ? '❤️ Unlike' : '🤍 Like'}
+                                        </button>
+                                        ${post.user_id === currentUser.id ? 
+                                            `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : 
+                                            ''
+                                        }
+                                    </div>
+                                ` : ''}
                                 
                                 <!-- Comments Section -->
                                 <div class="comments-section">
                                     ${comments?.map(comment => `
                                         <div class="comment">
-                                            <span class="comment-author">${comment.users.username}</span>
+                                            <span class="comment-author">${comment.users?.username || 'Unknown'}</span>
                                             <span>${comment.content}</span>
                                         </div>
                                     `).join('')}
                                     
-                                    <div class="comment-input">
-                                        <input type="text" id="comment-${post.id}" placeholder="Tulis komentar...">
-                                        <button onclick="addComment(${post.id})">Kirim</button>
-                                    </div>
+                                    ${currentUser ? `
+                                        <div class="comment-input">
+                                            <input type="text" id="comment-${post.id}" placeholder="Tulis komentar..." onkeypress="handleCommentKeyPress(event, ${post.id})">
+                                            <button onclick="addComment(${post.id})">Kirim</button>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -782,14 +1065,27 @@
 
             } catch (error) {
                 showAlert('Gagal load posts: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Toggle Like
+        // Handle comment key press
+        function handleCommentKeyPress(event, postId) {
+            if (event.key === 'Enter') {
+                addComment(postId);
+            }
+        }
+
+        // Toggle like
         async function toggleLike(postId) {
-            if (!currentUser) return;
+            if (!currentUser) {
+                showAlert('Login dulu untuk like!', 'error');
+                return;
+            }
 
             try {
+                // Check if already liked
                 const { data: existingLike } = await supabase
                     .from('likes')
                     .select('*')
@@ -799,32 +1095,57 @@
 
                 if (existingLike) {
                     // Unlike
-                    await supabase
+                    const { error: deleteError } = await supabase
                         .from('likes')
                         .delete()
                         .eq('post_id', postId)
                         .eq('user_id', currentUser.id);
-                    
-                    await supabase.rpc('decrement_likes', { post_id: postId });
+
+                    if (deleteError) throw deleteError;
+
+                    // Decrement likes count
+                    await supabase
+                        .from('posts')
+                        .update({ likes_count: supabase.rpc('decrement') })
+                        .eq('id', postId);
+
                 } else {
                     // Like
-                    await supabase
+                    const { error: insertError } = await supabase
                         .from('likes')
-                        .insert([{ post_id: postId, user_id: currentUser.id }]);
-                    
-                    await supabase.rpc('increment_likes', { post_id: postId });
+                        .insert([{ 
+                            post_id: postId, 
+                            user_id: currentUser.id 
+                        }]);
+
+                    if (insertError) throw insertError;
+
+                    // Increment likes count
+                    await supabase
+                        .from('posts')
+                        .update({ likes_count: supabase.rpc('increment') })
+                        .eq('id', postId);
                 }
 
-                loadPosts();
+                // Refresh posts
+                const activePage = document.querySelector('.nav-item.active').textContent;
+                if (activePage.includes('Beranda')) {
+                    loadPosts('all');
+                } else if (activePage.includes('Fotoku')) {
+                    loadPosts('my');
+                }
 
             } catch (error) {
                 showAlert('Error: ' + error.message, 'error');
             }
         }
 
-        // Add Comment
+        // Add comment
         async function addComment(postId) {
-            if (!currentUser) return;
+            if (!currentUser) {
+                showAlert('Login dulu untuk comment!', 'error');
+                return;
+            }
 
             const input = document.getElementById(`comment-${postId}`);
             const content = input.value.trim();
@@ -832,13 +1153,16 @@
             if (!content) return;
 
             try {
-                await supabase
+                // Insert comment
+                const { error: commentError } = await supabase
                     .from('comments')
                     .insert([{
                         post_id: postId,
                         user_id: currentUser.id,
                         content: content
                     }]);
+
+                if (commentError) throw commentError;
 
                 // Update comments count
                 await supabase
@@ -847,93 +1171,123 @@
                     .eq('id', postId);
 
                 input.value = '';
-                loadPosts();
+
+                // Refresh posts
+                const activePage = document.querySelector('.nav-item.active').textContent;
+                if (activePage.includes('Beranda')) {
+                    loadPosts('all');
+                } else if (activePage.includes('Fotoku')) {
+                    loadPosts('my');
+                }
 
             } catch (error) {
                 showAlert('Gagal comment: ' + error.message, 'error');
             }
         }
 
-        // Delete Post
+        // Delete post
         async function deletePost(postId) {
-            if (!confirm('Yakin ingin menghapus?')) return;
+            if (!confirm('Yakin ingin menghapus foto ini?')) return;
 
             try {
                 // Get post data to delete image from storage
-                const { data: post } = await supabase
+                const { data: post, error: fetchError } = await supabase
                     .from('posts')
                     .select('image_filename')
                     .eq('id', postId)
                     .single();
 
+                if (fetchError) throw fetchError;
+
                 // Delete from storage
                 if (post?.image_filename) {
-                    await supabase.storage
+                    const { error: storageError } = await supabase.storage
                         .from('gallery')
                         .remove([`photos/${post.image_filename}`]);
+
+                    if (storageError) console.error('Storage delete error:', storageError);
                 }
 
                 // Delete from database
-                await supabase
+                const { error: deleteError } = await supabase
                     .from('posts')
                     .delete()
                     .eq('id', postId)
                     .eq('user_id', currentUser.id);
 
-                showAlert('Post berhasil dihapus!', 'success');
-                loadPosts();
+                if (deleteError) throw deleteError;
+
+                showAlert('Foto berhasil dihapus!', 'success');
+
+                // Refresh posts
+                const activePage = document.querySelector('.nav-item.active').textContent;
+                if (activePage.includes('Beranda')) {
+                    loadPosts('all');
+                } else if (activePage.includes('Fotoku')) {
+                    loadPosts('my');
+                }
 
             } catch (error) {
                 showAlert('Gagal hapus: ' + error.message, 'error');
             }
         }
 
-        // Helper Functions
+        // =====================================================
+        // HELPER FUNCTIONS
+        // =====================================================
+
+        // Show alert
         function showAlert(message, type) {
             const alert = document.getElementById('alertMessage');
             alert.textContent = message;
             alert.className = `alert ${type}`;
             alert.style.display = 'block';
-            setTimeout(() => alert.style.display = 'none', 3000);
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
         }
 
-        function showLoading(show) {
-            const loading = document.getElementById('loadingIndicator');
+        // Show loading
+        function showLoading(show, message = 'Loading...') {
+            const existingLoading = document.getElementById('loadingIndicator');
+            
             if (show) {
-                if (!loading) {
+                if (!existingLoading) {
                     const div = document.createElement('div');
                     div.id = 'loadingIndicator';
                     div.className = 'loading';
-                    div.innerHTML = '<div class="spinner"></div><p>Loading...</p>';
+                    div.innerHTML = `
+                        <div class="spinner"></div>
+                        <p>${message}</p>
+                    `;
                     document.querySelector('.content').appendChild(div);
                 }
             } else {
-                if (loading) loading.remove();
-            }
-        }
-
-        // Check session on load
-        async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data: userData } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (userData) {
-                    currentUser = userData;
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    document.getElementById('currentUsername').textContent = userData.username;
-                    showPage('home');
+                if (existingLoading) {
+                    existingLoading.remove();
                 }
             }
         }
 
-        // Initialize
+        // =====================================================
+        // INITIALIZATION
+        // =====================================================
+
+        // Check session on load
         checkSession();
+
+        // Auto refresh posts every 30 seconds
+        setInterval(() => {
+            if (currentUser) {
+                const activePage = document.querySelector('.nav-item.active')?.textContent;
+                if (activePage?.includes('Beranda')) {
+                    loadPosts('all');
+                } else if (activePage?.includes('Fotoku')) {
+                    loadPosts('my');
+                }
+            }
+        }, 30000);
     </script>
 </body>
 </html>
