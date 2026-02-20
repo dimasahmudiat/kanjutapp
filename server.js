@@ -230,6 +230,100 @@ app.delete('/api/post/:postId', verifyToken, (req, res) => {
     });
 });
 
+// ========== CHAT ENDPOINTS ==========
+
+// Kirim pesan
+app.post('/api/messages/send', verifyToken, (req, res) => {
+    const { receiver_id, message } = req.body;
+    if (!receiver_id || !message) {
+        return res.status(400).json({ success: false, message: 'Receiver dan pesan harus diisi' });
+    }
+
+    pool.query(
+        'INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)',
+        [req.userId, receiver_id, message],
+        (err, result) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            res.json({ success: true, message: 'Pesan terkirim', messageId: result.insertId });
+        }
+    );
+});
+
+// Dapatkan daftar percakapan (user yang pernah chat dengan current user)
+app.get('/api/messages/conversations', verifyToken, (req, res) => {
+    const query = `
+        SELECT DISTINCT 
+            u.id as user_id,
+            u.username,
+            u.full_name,
+            u.avatar_url,
+            (SELECT m.message FROM messages m 
+             WHERE (m.sender_id = u.id AND m.receiver_id = ?) 
+                OR (m.sender_id = ? AND m.receiver_id = u.id)
+             ORDER BY m.created_at DESC LIMIT 1) as last_message,
+            (SELECT m.created_at FROM messages m 
+             WHERE (m.sender_id = u.id AND m.receiver_id = ?) 
+                OR (m.sender_id = ? AND m.receiver_id = u.id)
+             ORDER BY m.created_at DESC LIMIT 1) as last_time,
+            (SELECT COUNT(*) FROM messages m 
+             WHERE m.sender_id = u.id AND m.receiver_id = ? AND m.is_read = FALSE) as unread_count
+        FROM users u
+        WHERE u.id != ? AND EXISTS (
+            SELECT 1 FROM messages 
+            WHERE (sender_id = u.id AND receiver_id = ?) 
+               OR (sender_id = ? AND receiver_id = u.id)
+        )
+        ORDER BY last_time DESC
+    `;
+    pool.query(query, [req.userId, req.userId, req.userId, req.userId, req.userId, req.userId, req.userId, req.userId], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        res.json({ success: true, conversations: results });
+    });
+});
+
+// Dapatkan pesan dengan user tertentu
+app.get('/api/messages/with/:userId', verifyToken, (req, res) => {
+    const otherUserId = req.params.userId;
+    pool.query(
+        `SELECT m.*, u_sender.username as sender_name, u_receiver.username as receiver_name
+         FROM messages m
+         JOIN users u_sender ON m.sender_id = u_sender.id
+         JOIN users u_receiver ON m.receiver_id = u_receiver.id
+         WHERE (m.sender_id = ? AND m.receiver_id = ?) 
+            OR (m.sender_id = ? AND m.receiver_id = ?)
+         ORDER BY m.created_at ASC`,
+        [req.userId, otherUserId, otherUserId, req.userId],
+        (err, results) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+
+            // Tandai pesan yang diterima sebagai sudah dibaca
+            pool.query(
+                'UPDATE messages SET is_read = TRUE WHERE sender_id = ? AND receiver_id = ? AND is_read = FALSE',
+                [otherUserId, req.userId],
+                (err2) => {
+                    if (err2) console.error('Error marking messages as read:', err2);
+                }
+            );
+
+            res.json({ success: true, messages: results });
+        }
+    );
+});
+
+// Cari user untuk memulai chat (berdasarkan username)
+app.get('/api/users/search', verifyToken, (req, res) => {
+    const query = req.query.q || '';
+    if (query.length < 1) return res.json({ success: true, users: [] });
+
+    pool.query(
+        'SELECT id, username, full_name, avatar_url FROM users WHERE username LIKE ? AND id != ? LIMIT 10',
+        [`%${query}%`, req.userId],
+        (err, results) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            res.json({ success: true, users: results });
+        }
+    );
+});
 // ========== JALANKAN SERVER ==========
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
