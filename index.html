@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryApp - MySQL Version</title>
-    
+    <title>GalleryApp - MySQL</title>
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         * {
             margin: 0;
@@ -19,26 +16,21 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-
-        /* Auth Pages */
         .auth-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
-
         .auth-card {
             background: white;
             padding: 40px;
@@ -48,25 +40,16 @@
             max-width: 400px;
             animation: fadeIn 0.5s ease;
         }
-
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
         .auth-card h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #333;
             font-size: 28px;
         }
-
         .info-box {
             background: #e3f2fd;
             border-left: 4px solid #2196f3;
@@ -75,22 +58,18 @@
             border-radius: 8px;
             font-size: 14px;
         }
-
         .info-box strong {
             color: #1976d2;
         }
-
         .input-group {
             margin-bottom: 20px;
         }
-
         .input-group label {
             display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
         }
-
         .input-group input {
             width: 100%;
             padding: 12px 15px;
@@ -99,13 +78,11 @@
             font-size: 16px;
             transition: all 0.3s;
         }
-
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-
         .btn {
             width: 100%;
             padding: 14px;
@@ -119,46 +96,33 @@
             transition: transform 0.3s, box-shadow 0.3s;
             margin-bottom: 10px;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-        }
-
         .btn-success {
             background: #27ae60;
         }
-
-        .btn-warning {
-            background: #f39c12;
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
-
         .auth-link {
             text-align: center;
             margin-top: 20px;
             color: #666;
         }
-
         .auth-link a {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
         }
-
-        /* Main App */
         .main-app {
             display: none;
             background: #f5f5f5;
             border-radius: 20px;
             overflow: hidden;
         }
-
-        /* Navbar */
         .navbar {
             background: white;
             padding: 15px 30px;
@@ -168,41 +132,34 @@
             align-items: center;
             flex-wrap: wrap;
         }
-
         .nav-brand {
             font-size: 24px;
             font-weight: 700;
             color: #667eea;
         }
-
         .nav-menu {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-
         .nav-item {
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 10px;
             font-weight: 500;
         }
-
         .nav-item:hover {
             background: #f0f0f0;
         }
-
         .nav-item.active {
             background: #667eea;
             color: white;
         }
-
         .user-section {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
         .username-badge {
             font-weight: 600;
             color: #333;
@@ -210,7 +167,6 @@
             padding: 5px 15px;
             border-radius: 20px;
         }
-
         .logout-btn {
             padding: 8px 20px;
             background: #e74c3c;
@@ -220,21 +176,15 @@
             cursor: pointer;
             font-weight: 500;
         }
-
         .logout-btn:hover {
             background: #c0392b;
         }
-
-        /* Content Area */
         .content {
             padding: 30px;
         }
-
-        /* Page Header */
         .page-header {
             margin-bottom: 30px;
         }
-
         .page-header h2 {
             color: #333;
             font-size: 28px;
@@ -242,15 +192,12 @@
             padding-bottom: 10px;
             display: inline-block;
         }
-
-        /* Gallery Grid */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
             margin-top: 30px;
         }
-
         .photo-card {
             background: white;
             border-radius: 15px;
@@ -258,29 +205,24 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
         }
-
         .photo-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
-
         .photo-image {
             width: 100%;
             height: 300px;
             object-fit: cover;
         }
-
         .photo-details {
             padding: 20px;
         }
-
         .photo-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-
         .photo-author {
             font-weight: 600;
             color: #667eea;
@@ -289,19 +231,16 @@
             border-radius: 15px;
             font-size: 14px;
         }
-
         .photo-date {
             color: #999;
             font-size: 12px;
         }
-
         .photo-caption {
             color: #666;
             line-height: 1.6;
             margin: 15px 0;
             font-size: 15px;
         }
-
         .photo-stats {
             display: flex;
             gap: 15px;
@@ -309,52 +248,31 @@
             font-size: 14px;
             margin: 10px 0;
         }
-
         .photo-actions {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
-
-        .like-btn {
+        .like-btn, .delete-btn {
             padding: 8px;
-            background: #f0f0f0;
-            color: #333;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
             flex: 1;
         }
-
+        .like-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
         .like-btn.liked {
             background: #ff6b6b;
             color: white;
         }
-
         .delete-btn {
-            padding: 8px;
             background: #e74c3c;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
         }
-
-        .edit-btn {
-            padding: 8px;
-            background: #f39c12;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            flex: 1;
-        }
-
-        /* Upload Form */
         .upload-section {
             background: white;
             padding: 30px;
@@ -363,7 +281,6 @@
             max-width: 600px;
             margin: 0 auto;
         }
-
         .upload-section h3 {
             color: #333;
             margin-bottom: 25px;
@@ -371,7 +288,6 @@
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 15px;
         }
-
         .file-upload {
             border: 3px dashed #667eea;
             padding: 40px;
@@ -381,21 +297,17 @@
             transition: all 0.3s;
             margin-bottom: 20px;
         }
-
         .file-upload:hover {
             background: #f8f9ff;
             border-color: #764ba2;
         }
-
         .file-upload p {
             color: #667eea;
             font-size: 18px;
         }
-
         .file-upload input {
             display: none;
         }
-
         .image-preview {
             max-width: 100%;
             max-height: 300px;
@@ -403,11 +315,9 @@
             border-radius: 10px;
             display: none;
         }
-
         .image-preview.show {
             display: block;
         }
-
         textarea {
             width: 100%;
             padding: 12px 15px;
@@ -418,53 +328,10 @@
             resize: vertical;
             margin-bottom: 20px;
         }
-
         textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-
-        /* Comments Section */
-        .comments-section {
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .comment {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .comment-author {
-            font-weight: 600;
-            color: #667eea;
-        }
-
-        .comment-input {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .comment-input input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .comment-input button {
-            padding: 8px 15px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 50px;
@@ -472,42 +339,12 @@
             font-size: 18px;
             grid-column: 1/-1;
         }
-
         .empty-state i {
             font-size: 80px;
             color: #ddd;
             margin-bottom: 20px;
             display: block;
         }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .modal-content h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        /* Loading */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -520,14 +357,12 @@
             align-items: center;
             z-index: 9999;
         }
-
         .loading-content {
             background: white;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
         }
-
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
@@ -537,32 +372,25 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .navbar {
                 padding: 15px;
             }
-            
             .nav-menu {
                 width: 100%;
                 justify-content: center;
                 margin: 10px 0;
             }
-            
             .content {
                 padding: 20px;
             }
-            
             .gallery-grid {
                 grid-template-columns: 1fr;
             }
-            
             .photo-actions {
                 flex-direction: column;
             }
@@ -584,14 +412,12 @@
             <!-- Login Card -->
             <div id="loginCard" class="auth-card">
                 <h2>📸 GalleryApp</h2>
-                
                 <div class="info-box">
                     <strong>🔑 Data Testing:</strong><br>
                     Username: <strong>123</strong><br>
                     Password: <strong>123</strong><br>
-                    <small>(Sudah otomatis terisi)</small>
+                    <small>(Pastikan user test sudah dibuat di database)</small>
                 </div>
-                
                 <div class="input-group">
                     <label>Username</label>
                     <input type="text" id="loginUsername" placeholder="Masukkan username" value="123">
@@ -686,26 +512,13 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <h3>✏️ Edit Caption</h3>
-            <textarea id="editCaption" rows="4" placeholder="Edit caption..."></textarea>
-            <button class="btn" id="saveEditBtn">Simpan</button>
-            <button class="btn btn-secondary" id="cancelEditBtn">Batal</button>
-        </div>
-    </div>
-
     <script>
-        // ================== KONFIGURASI ==================
-        // Ubah ini sesuai dengan URL backend Anda
-        // Untuk local development:
-        const API_URL = 'http://localhost:3000/api';
-        // Untuk production (Vercel), gunakan relative URL:
-        // const API_URL = '/api';
+        // ================== KONFIGURASI API ==================
+        // Untuk production (backend di Vercel), gunakan relative URL
+        const API_URL = '/api';  // Akan mengarah ke backend yang sama
+        // Untuk local development, ganti dengan 'http://localhost:3000/api'
 
         let currentUser = null;
-        let currentEditId = null;
         let token = localStorage.getItem('token');
 
         // ================== HELPER FUNCTIONS ==================
@@ -718,24 +531,17 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // Fungsi aman untuk fetch JSON
         async function safeFetch(url, options = {}) {
             try {
                 const response = await fetch(url, options);
-                
-                // Cek apakah response OK (status 200-299)
                 if (!response.ok) {
-                    // Coba ambil teks response untuk error
                     const text = await response.text();
                     throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
                 }
-                
-                // Coba parse JSON
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     return await response.json();
                 } else {
-                    // Jika bukan JSON, ambil teks
                     const text = await response.text();
                     throw new Error('Response bukan JSON: ' + text.substring(0, 100));
                 }
@@ -749,10 +555,8 @@
         async function checkConnection() {
             try {
                 showLoading('Mengecek koneksi database...');
-                
                 const data = await safeFetch(`${API_URL}/test`);
                 hideLoading();
-
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
@@ -803,13 +607,11 @@
 
             try {
                 showLoading('Login...');
-
                 const data = await safeFetch(`${API_URL}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-
                 hideLoading();
 
                 if (data.success) {
@@ -866,13 +668,11 @@
 
             try {
                 showLoading('Mendaftar...');
-
                 const data = await safeFetch(`${API_URL}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, email, password })
                 });
-
                 hideLoading();
 
                 if (data.success) {
@@ -903,14 +703,21 @@
             token = null;
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            
+
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
-            
+
             Swal.fire('👋', 'Sampai jumpa lagi!', 'info');
         });
 
         // ================== NAVIGATION ==================
+        function setActiveNav(page) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (page === 'home') document.getElementById('homeNav').classList.add('active');
+            else if (page === 'myphotos') document.getElementById('myPhotosNav').classList.add('active');
+            else if (page === 'upload') document.getElementById('uploadNav').classList.add('active');
+        }
+
         document.getElementById('homeNav').addEventListener('click', function() {
             setActiveNav('home');
             document.getElementById('homePage').style.display = 'block';
@@ -924,7 +731,7 @@
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('myPhotosPage').style.display = 'block';
             document.getElementById('uploadPage').style.display = 'none';
-            loadPosts('my');
+            if (currentUser) loadPosts('my');
         });
 
         document.getElementById('uploadNav').addEventListener('click', function() {
@@ -932,19 +739,12 @@
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('myPhotosPage').style.display = 'none';
             document.getElementById('uploadPage').style.display = 'block';
-            
+
             // Reset form
             document.getElementById('fileInput').value = '';
             document.getElementById('caption').value = '';
             document.getElementById('preview').style.display = 'none';
         });
-
-        function setActiveNav(page) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            if (page === 'home') document.getElementById('homeNav').classList.add('active');
-            else if (page === 'myphotos') document.getElementById('myPhotosNav').classList.add('active');
-            else if (page === 'upload') document.getElementById('uploadNav').classList.add('active');
-        }
 
         // ================== UPLOAD ==================
         document.getElementById('fileUploadArea').addEventListener('click', function() {
@@ -988,7 +788,6 @@
 
             try {
                 showLoading('Uploading...');
-
                 const response = await fetch(`${API_URL}/upload`, {
                     method: 'POST',
                     headers: {
@@ -997,7 +796,6 @@
                     body: formData
                 });
 
-                // Cek response
                 if (!response.ok) {
                     const text = await response.text();
                     throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
@@ -1042,7 +840,6 @@
                 }
 
                 const data = await safeFetch(url);
-
                 hideLoading();
 
                 const container = type === 'all' ? 
@@ -1073,13 +870,10 @@
                                 <p class="photo-caption">${post.caption}</p>
                                 <div class="photo-stats">
                                     <span>❤️ ${post.likes_count || 0} likes</span>
-                                    <span>💬 ${post.comments_count || 0} comments</span>
                                 </div>
                                 ${currentUser ? `
                                     <div class="photo-actions">
-                                        <button class="like-btn ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
-                                            ${post.is_liked ? '❤️ Unlike' : '🤍 Like'}
-                                        </button>
+                                        <button class="like-btn" onclick="toggleLike(${post.id})">🤍 Like</button>
                                         ${post.user_id === currentUser.id ? 
                                             `<button class="delete-btn" onclick="deletePost(${post.id})">🗑️ Hapus</button>` : 
                                             ''
@@ -1141,14 +935,12 @@
 
             try {
                 showLoading('Menghapus...');
-
                 const data = await safeFetch(`${API_URL}/post/${postId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
                 hideLoading();
 
                 if (data.success) {
@@ -1185,7 +977,7 @@
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('mainApp').style.display = 'block';
                     document.getElementById('displayUsername').textContent = currentUser.username;
-                    
+
                     loadPosts('all');
                 } catch (e) {
                     localStorage.removeItem('user');
